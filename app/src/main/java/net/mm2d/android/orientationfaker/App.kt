@@ -22,5 +22,6 @@ class App : Application() {
         Log.setInitializer(AndroidLogInitializer.get())
         Log.initialize(BuildConfig.DEBUG, true)
         Settings.initialize(this)
+        AdMob.initialize(this)
     }
 }

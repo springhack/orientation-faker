@@ -20,7 +20,9 @@ import android.text.format.DateFormat
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.LinearLayout.LayoutParams
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.layout_main.*
 import net.mm2d.android.orientationfaker.orientation.OrientationHelper
 import net.mm2d.android.orientationfaker.orientation.OrientationIdManager
 import net.mm2d.android.orientationfaker.orientation.OverlayPermissionHelper
@@ -65,7 +67,12 @@ class MainActivity : AppCompatActivity() {
         } else if (settings.shouldResident()) {
             MainService.start(this)
         }
+        setUpAdView()
         checkPermission()
+    }
+
+    private fun setUpAdView() {
+        container.addView(AdMob.makeAdView(this), LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
     }
 
     private fun checkPermission() {
@@ -92,7 +99,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when(item?.itemId) {
+        when (item?.itemId) {
             R.id.license -> startActivity(Intent(this, LicenseActivity::class.java))
             R.id.play_store -> openGooglePlay(this)
         }
@@ -158,8 +165,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun makeVersionInfo(): String {
         return "Ver." + BuildConfig.VERSION_NAME +
-        if (BuildConfig.DEBUG) " # " + DateFormat.format("yyyy/M/d kk:mm:ss", BuildConfig.BUILD_TIME)
-        else ""
+                if (BuildConfig.DEBUG) " # " + DateFormat.format("yyyy/M/d kk:mm:ss", BuildConfig.BUILD_TIME)
+                else ""
     }
 
     companion object {
