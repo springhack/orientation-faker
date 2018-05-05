@@ -45,7 +45,7 @@ android {
             return
         }
         variant.outputs.all {
-            outputFileName = "${applicationName}-${versionName}.apk"
+            outputFileName = "${applicationName}-${versionName}-google-play.apk"
         }
     }
 }
