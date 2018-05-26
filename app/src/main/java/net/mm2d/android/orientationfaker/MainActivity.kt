@@ -35,7 +35,7 @@ import java.util.*
  */
 class MainActivity : AppCompatActivity() {
     private val settings by lazy {
-        Settings(this)
+        Settings.get()
     }
     private val orientationHelper by lazy {
         OrientationHelper.getInstance(this)
@@ -195,8 +195,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         private fun openGooglePlay(context: Context, packageName: String): Boolean {
-            return openUri(context, "market://details?id=" + packageName) ||
-                    openUri(context, "https://play.google.com/store/apps/details?id=" + packageName)
+            return openUri(context, "market://details?id=$packageName") ||
+                    openUri(context, "https://play.google.com/store/apps/details?id=$packageName")
         }
 
         private fun openGooglePlay(context: Context): Boolean {
