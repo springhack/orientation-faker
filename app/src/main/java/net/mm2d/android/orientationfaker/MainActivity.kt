@@ -21,6 +21,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout.LayoutParams
+import com.google.android.gms.ads.AdView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_main.*
 import net.mm2d.android.orientationfaker.orientation.OrientationHelper
@@ -48,6 +49,8 @@ class MainActivity : AppCompatActivity() {
             setOrientationIcon()
         }
     }
+    private lateinit var adView: AdView
+    private lateinit var relevantAds: MenuItem
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +75,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpAdView() {
-        container.addView(AdMob.makeAdView(this), LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        adView = AdMob.makeAdView(this)
+        container.addView(adView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
     }
 
     private fun checkPermission() {
@@ -93,15 +97,27 @@ class MainActivity : AppCompatActivity() {
                 .unregisterReceiver(receiver)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onResume() {
+        super.onResume()
+        AdMob.loadAd(this, adView)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main, menu)
+        relevantAds = menu.findItem(R.id.relevant_ads)
         return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        relevantAds.isVisible = AdMob.isInEeaOrUnknown()
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.license -> startActivity(Intent(this, LicenseActivity::class.java))
             R.id.play_store -> openGooglePlay(this)
+            R.id.relevant_ads -> AdMob.updateConsent(this)
         }
         return true
     }

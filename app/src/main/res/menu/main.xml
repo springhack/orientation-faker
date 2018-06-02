@@ -13,4 +13,10 @@
         android:title="@string/play_store"
         app:showAsAction="never"
         />
+    <item
+        android:id="@+id/relevant_ads"
+        android:orderInCategory="101"
+        android:title="@string/relevant_ads"
+        app:showAsAction="never"
+        />
 </menu>
