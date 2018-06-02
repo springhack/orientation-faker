@@ -50,7 +50,6 @@ class App : Application() {
                     .detectAll()
                     .penaltyLog()
                     .penaltyDropBox()
-                    .penaltyDialog()
                     .build())
             StrictMode.setVmPolicy(VmPolicy.Builder()
                     .detectAll()
