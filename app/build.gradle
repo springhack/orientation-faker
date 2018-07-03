@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'io.fabric'
+apply plugin: 'com.google.firebase.firebase-perf'
 
 def applicationName = "OrientationFaker"
 def versionMajor = 2
@@ -72,6 +73,7 @@ dependencies {
     }
     implementation 'com.google.firebase:firebase-core:16.0.1'
     implementation 'com.google.firebase:firebase-ads:15.0.1'
+    implementation 'com.google.firebase:firebase-perf:16.0.0'
     implementation 'com.google.android.ads.consent:consent-library:1.0.6'
 }
 
