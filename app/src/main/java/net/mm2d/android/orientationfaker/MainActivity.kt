@@ -12,15 +12,14 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.support.v4.content.LocalBroadcastManager
-import android.support.v4.util.Pair
-import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout.LayoutParams
+import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.ads.AdView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_main.*
@@ -181,7 +180,7 @@ class MainActivity : AppCompatActivity() {
     private fun setOrientationIcon() {
         val orientation = settings.orientation
         for (pair in buttonList) {
-            pair.second?.run {
+            pair.second.run {
                 setBackgroundResource(if (orientation == pair.first) R.drawable.bg_icon_selected else R.drawable.bg_icon)
             }
         }

@@ -7,16 +7,16 @@ apply plugin: 'com.google.firebase.firebase-perf'
 def applicationName = "OrientationFaker"
 def versionMajor = 2
 def versionMinor = 0
-def versionPatch = 20
+def versionPatch = 21
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         applicationId "net.mm2d.android.orientationfaker"
         minSdkVersion 16
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
         resConfigs "en", "ja"
@@ -51,22 +51,15 @@ android {
     }
 }
 
-repositories {
-    maven {
-        url 'https://ohmae.github.com/maven'
-    }
-    mavenCentral()
-}
-
 dependencies {
-    implementation 'com.android.support:support-v4:27.1.1'
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'net.mm2d:log:0.0.3'
-    implementation 'net.mm2d:log-android:0.0.3'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'net.mm2d:log:0.1.0'
+    implementation 'net.mm2d:log-android:0.1.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.0'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
-    implementation 'io.reactivex.rxjava2:rxkotlin:2.2.0'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.3.0'
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.1'
     debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.1'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.1'
