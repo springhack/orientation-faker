@@ -78,12 +78,15 @@ object AdMob {
         }
     }
 
-    fun loadAndConfirmConsentState(context: Context): Single<ConsentStatus> {
+    private fun loadAndConfirmConsentState(context: Context): Single<ConsentStatus> {
         val subject = SingleSubject.create<ConsentStatus>()
         if (notifyOrConfirm(context, subject)) {
             return subject
         }
         val consentInformation = ConsentInformation.getInstance(context)
+        if (BuildConfig.DEBUG) {
+            consentInformation.debugGeography = DebugGeography.DEBUG_GEOGRAPHY_EEA
+        }
         consentInformation.requestConsentInfoUpdate(arrayOf(PUBLISHER_ID), object : ConsentInfoUpdateListener {
             override fun onConsentInfoUpdated(status: ConsentStatus?) {
                 checked = true
