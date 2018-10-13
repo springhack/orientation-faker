@@ -29,7 +29,7 @@ object AdMob {
     private const val APP_ID = "ca-app-pub-3057634395460859~4653069539"
     private const val UNIT_ID_SETTINGS = "ca-app-pub-3057634395460859/5509364941"
     private const val PUBLISHER_ID = "pub-3057634395460859"
-    private const val PRIVACY_POLICY_URL = "https://github.com/ohmae/OrientationFaker/blob/develop/PRIVACY-POLICY.md"
+    private const val PRIVACY_POLICY_URL = "https://github.com/ohmae/orientation-faker/blob/develop/PRIVACY-POLICY.md"
     private var checked: Boolean = false
     private var isInEeaOrUnknown: Boolean = false
     private var consentStatus: ConsentStatus? = null
