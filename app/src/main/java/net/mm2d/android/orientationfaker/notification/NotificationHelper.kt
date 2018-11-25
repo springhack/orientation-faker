@@ -15,9 +15,9 @@ import android.os.Build.VERSION_CODES
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import net.mm2d.android.orientationfaker.MainActivity
 import net.mm2d.android.orientationfaker.R
-import net.mm2d.android.orientationfaker.R.*
 import net.mm2d.android.orientationfaker.orientation.OrientationIdManager
 import net.mm2d.android.orientationfaker.orientation.OrientationReceiver
 import net.mm2d.android.orientationfaker.settings.Settings
@@ -33,7 +33,8 @@ object NotificationHelper {
     @RequiresApi(VERSION_CODES.O)
     private fun createChannel(context: Context) {
         val name = context.getString(R.string.notification_channel_name)
-        val channel = NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_LOW).also {
+        val importance = NotificationManager.IMPORTANCE_LOW
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).also {
             it.enableLights(false)
             it.enableVibration(false)
         }
@@ -46,7 +47,7 @@ object NotificationHelper {
     }
 
     private fun getNotificationManager(context: Context): NotificationManager? =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
 
     fun startForeground(service: Service) {
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
@@ -62,22 +63,29 @@ object NotificationHelper {
     private fun makeNotification(context: Context): Notification {
         val orientation = Settings.get().orientation
         return NotificationCompat.Builder(context, CHANNEL_ID)
-                .setDefaults(0)
-                .setContentTitle(context.getText(R.string.app_name))
-                .setCustomContentView(createRemoteViews(context, orientation))
-                .setSmallIcon(OrientationIdManager.getIconIdFromOrientation(orientation))
-                .setOngoing(true)
-                .build()
+            .setDefaults(0)
+            .setContentTitle(context.getText(R.string.app_name))
+            .setCustomContentView(createRemoteViews(context, orientation))
+            .setSmallIcon(OrientationIdManager.getIconIdFromOrientation(orientation))
+            .setOngoing(true)
+            .build()
     }
 
     private fun createRemoteViews(context: Context, orientation: Int): RemoteViews {
-        return RemoteViews(context.packageName, layout.notification).also { views ->
+        val selected = ContextCompat.getColor(context, R.color.bg_notification_selected)
+        val transparent = ContextCompat.getColor(context, android.R.color.transparent)
+        return RemoteViews(context.packageName, R.layout.notification).also { views ->
             OrientationIdManager.list.forEach {
-                views.setOnClickPendingIntent(it.viewId, createOrientationIntent(context, it.orientation))
-                views.setInt(it.viewId, "setBackgroundResource",
-                        if (orientation == it.orientation) drawable.bg_icon_selected else drawable.bg_icon)
+                views.setOnClickPendingIntent(
+                    it.viewId,
+                    createOrientationIntent(context, it.orientation)
+                )
+                views.setInt(
+                    it.viewId, "setBackgroundColor",
+                    if (orientation == it.orientation) selected else transparent
+                )
             }
-            views.setOnClickPendingIntent(id.button_settings, createActivityIntent(context))
+            views.setOnClickPendingIntent(R.id.button_settings, createActivityIntent(context))
         }
     }
 
@@ -86,7 +94,12 @@ object NotificationHelper {
             it.putExtra(OrientationReceiver.EXTRA_ORIENTATION, orientation)
             it.setClass(context, OrientationReceiver::class.java)
         }
-        return PendingIntent.getBroadcast(context, orientation, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        return PendingIntent.getBroadcast(
+            context,
+            orientation,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
     }
 
     private fun createActivityIntent(context: Context): PendingIntent {

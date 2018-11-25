@@ -12,21 +12,24 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.text.TextUtils
 import android.text.format.DateFormat
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout.LayoutParams
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.ads.AdView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_main.*
+import kotlinx.android.synthetic.main.notification.*
 import net.mm2d.android.orientationfaker.orientation.OrientationHelper
 import net.mm2d.android.orientationfaker.orientation.OrientationIdManager
 import net.mm2d.android.orientationfaker.orientation.OverlayPermissionHelper
 import net.mm2d.android.orientationfaker.settings.Settings
+import net.mm2d.android.orientationfaker.tabs.CustomTabsHelper
 import net.mm2d.log.Log
 import java.util.*
 
@@ -55,10 +58,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         supportActionBar?.title = getString(R.string.app_name)
-        supportActionBar?.subtitle = makeVersionInfo()
-
         status.setOnClickListener { toggleStatus() }
         resident.setOnClickListener { toggleResident() }
+        version_description.text = makeVersionInfo()
         setStatusDescription()
         setResidentCheckBox()
         setUpOrientationIcons()
@@ -96,12 +98,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun registerReceiver() {
         LocalBroadcastManager.getInstance(this)
-                .registerReceiver(receiver, IntentFilter(ACTION_UPDATE))
+            .registerReceiver(receiver, IntentFilter(ACTION_UPDATE))
     }
 
     private fun unregisterReceiver() {
         LocalBroadcastManager.getInstance(this)
-                .unregisterReceiver(receiver)
+            .unregisterReceiver(receiver)
     }
 
     override fun onResume() {
@@ -122,7 +124,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
-            R.id.license -> startActivity(Intent(this, LicenseActivity::class.java))
+            R.id.license -> LicenseActivity.start(this)
+            R.id.source_code -> openSourceCode(this)
+            R.id.privacy_policy -> openPrivacyPolicy(this)
             R.id.play_store -> openGooglePlay(this)
             R.id.relevant_ads -> AdMob.updateConsent(this)
         }
@@ -137,6 +141,7 @@ class MainActivity : AppCompatActivity() {
             button.setOnClickListener { setOrientation(orientation) }
         }
         setOrientationIcon()
+        button_settings.visibility = View.GONE
     }
 
     private fun toggleStatus() {
@@ -179,16 +184,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun setOrientationIcon() {
         val orientation = settings.orientation
+        val selected = ContextCompat.getColor(this, R.color.bg_notification_selected)
+        val transparent = ContextCompat.getColor(this, android.R.color.transparent)
         for (pair in buttonList) {
             pair.second.run {
-                setBackgroundResource(if (orientation == pair.first) R.drawable.bg_icon_selected else R.drawable.bg_icon)
+                setBackgroundColor(if (orientation == pair.first) selected else transparent)
             }
         }
     }
 
     private fun makeVersionInfo(): String {
-        return "Ver." + BuildConfig.VERSION_NAME +
-                if (BuildConfig.DEBUG) " # " + DateFormat.format("yyyy/M/d kk:mm:ss", BuildConfig.BUILD_TIME)
+        return BuildConfig.VERSION_NAME +
+                if (BuildConfig.DEBUG)
+                    " # " + DateFormat.format("yyyy/M/d kk:mm:ss", BuildConfig.BUILD_TIME)
                 else ""
     }
 
@@ -196,16 +204,17 @@ class MainActivity : AppCompatActivity() {
         private const val PACKAGE_NAME = "net.mm2d.android.orientationfaker"
         private const val ACTION_UPDATE = "ACTION_UPDATE"
         private const val REQUEST_CODE = 101
+        private const val PRIVACY_POLICY_URL =
+            "https://github.com/ohmae/orientation-faker/blob/develop/PRIVACY-POLICY.md"
+        private const val GITHUB_URL =
+            "https://github.com/ohmae/orientation-faker/"
 
         fun notifyUpdate(context: Context) {
             LocalBroadcastManager.getInstance(context)
-                    .sendBroadcast(Intent(ACTION_UPDATE))
+                .sendBroadcast(Intent(ACTION_UPDATE))
         }
 
-        private fun openUri(context: Context, uri: String?): Boolean {
-            if (TextUtils.isEmpty(uri)) {
-                return false
-            }
+        private fun openUri(context: Context, uri: String): Boolean {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
                 intent.addCategory(Intent.CATEGORY_BROWSABLE)
@@ -217,13 +226,36 @@ class MainActivity : AppCompatActivity() {
             return true
         }
 
+        private fun openCustomTabs(context: Context, uri: String): Boolean {
+            try {
+                val intent = CustomTabsIntent.Builder(CustomTabsHelper.session)
+                    .setShowTitle(true)
+                    .setToolbarColor(ContextCompat.getColor(context, R.color.primary))
+                    .build()
+                intent.intent.setPackage(CustomTabsHelper.packageNameToBind)
+                intent.launchUrl(context, Uri.parse(uri))
+            } catch (e: ActivityNotFoundException) {
+                Log.w(e)
+                return false
+            }
+            return true
+        }
+
         private fun openGooglePlay(context: Context, packageName: String): Boolean {
             return openUri(context, "market://details?id=$packageName") ||
-                    openUri(context, "https://play.google.com/store/apps/details?id=$packageName")
+                    openCustomTabs(context, "https://play.google.com/store/apps/details?id=$packageName")
         }
 
         private fun openGooglePlay(context: Context): Boolean {
             return openGooglePlay(context, PACKAGE_NAME)
+        }
+
+        private fun openPrivacyPolicy(context: Context) {
+            openCustomTabs(context, PRIVACY_POLICY_URL)
+        }
+
+        private fun openSourceCode(context: Context) {
+            openCustomTabs(context, GITHUB_URL)
         }
     }
 }

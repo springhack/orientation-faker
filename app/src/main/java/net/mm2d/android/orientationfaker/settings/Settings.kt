@@ -26,7 +26,12 @@ class Settings private constructor(context: Context) {
     private val storage: SettingsStorage = SettingsStorage(context)
 
     var orientation: Int
-        get() = verifyOrientation(storage.readInt(Key.ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED))
+        get() = verifyOrientation(
+            storage.readInt(
+                Key.ORIENTATION,
+                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            )
+        )
         set(orientation) = storage.writeInt(Key.ORIENTATION, verifyOrientation(orientation))
 
     fun setResident(resident: Boolean) {
@@ -53,11 +58,11 @@ class Settings private constructor(context: Context) {
                     if (BuildConfig.DEBUG) {
                         Log.e("!!!!!!!!!! BLOCK !!!!!!!!!!")
                     }
-                    if (!condition.await(1, TimeUnit.SECONDS)) {
+                    if (!condition.await(4, TimeUnit.SECONDS)) {
                         throw IllegalStateException("Settings initialization timeout")
                     }
                 }
-                return settings as Settings
+                return settings!!
             }
         }
 
@@ -68,8 +73,8 @@ class Settings private constructor(context: Context) {
          */
         fun initialize(context: Context) {
             Completable.fromAction { initializeInner(context) }
-                    .subscribeOn(Schedulers.io())
-                    .subscribe()
+                .subscribeOn(Schedulers.io())
+                .subscribe()
         }
 
         private fun initializeInner(context: Context) {
