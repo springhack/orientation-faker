@@ -5,7 +5,7 @@
  * http://opensource.org/licenses/MIT
  */
 
-package net.mm2d.android.orientationfaker
+package net.mm2d.orientation
 
 import android.content.Context
 import android.os.Bundle
@@ -20,6 +20,7 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import io.reactivex.Single
 import io.reactivex.subjects.SingleSubject
+import net.mm2d.android.orientationfaker.BuildConfig
 import net.mm2d.log.Log
 import java.net.URL
 
