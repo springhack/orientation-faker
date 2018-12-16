@@ -39,7 +39,12 @@
             />
         <activity
             android:name="net.mm2d.orientation.LicenseActivity"
+            android:label="@string/license"
             android:theme="@style/AppTheme.NoActionBar"
+            />
+        <activity
+            android:name="net.mm2d.orientation.DetailedSettingsActivity"
+            android:label="@string/detailed_settings"
             />
 
         <service
@@ -62,7 +67,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name="net.mm2d.orientation.orientation.OrientationReceiver"
+            android:name="net.mm2d.orientation.control.OrientationReceiver"
             android:permission="${applicationId}.permission"
             >
             <intent-filter>

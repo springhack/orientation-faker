@@ -7,33 +7,26 @@
 
 package net.mm2d.orientation
 
-import android.content.*
-import android.net.Uri
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.format.DateFormat
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.LinearLayout.LayoutParams
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.core.content.ContextCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.ads.AdView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_main.*
-import kotlinx.android.synthetic.main.notification.*
 import net.mm2d.android.orientationfaker.BuildConfig
 import net.mm2d.android.orientationfaker.R
-import net.mm2d.log.Log
-import net.mm2d.orientation.orientation.OrientationHelper
-import net.mm2d.orientation.orientation.OrientationIdManager
-import net.mm2d.orientation.orientation.OverlayPermissionHelper
+import net.mm2d.orientation.control.OrientationHelper
+import net.mm2d.orientation.control.OverlayPermissionHelper
 import net.mm2d.orientation.settings.Settings
-import net.mm2d.orientation.tabs.CustomTabsHelper
-import java.util.*
+import net.mm2d.orientation.util.LaunchUtils
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
@@ -45,14 +38,14 @@ class MainActivity : AppCompatActivity() {
     private val orientationHelper by lazy {
         OrientationHelper.getInstance(this)
     }
-    private val buttonList = ArrayList<Pair<Int, View>>()
     private val handler = Handler(Looper.getMainLooper())
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            setStatusDescription()
-            setOrientationIcon()
+            applyStatus()
+            notificationSample.update()
         }
     }
+    private lateinit var notificationSample: NotificationSample
     private lateinit var adView: AdView
     private lateinit var relevantAds: MenuItem
 
@@ -60,13 +53,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         supportActionBar?.title = getString(R.string.app_name)
+        notificationSample = NotificationSample(this)
         status.setOnClickListener { toggleStatus() }
         resident.setOnClickListener { toggleResident() }
+        detailed_setting.setOnClickListener { DetailedSettingsActivity.start(this) }
         version_description.text = makeVersionInfo()
-        setStatusDescription()
-        setResidentCheckBox()
+        applyStatus()
+        applyResident()
         setUpOrientationIcons()
-        registerReceiver()
+        UpdateRouter.register(receiver)
         if (!OverlayPermissionHelper.canDrawOverlays(this)) {
             MainService.stop(this)
         } else if (settings.shouldResident()) {
@@ -95,21 +90,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver()
-    }
-
-    private fun registerReceiver() {
-        LocalBroadcastManager.getInstance(this)
-            .registerReceiver(receiver, IntentFilter(ACTION_UPDATE))
-    }
-
-    private fun unregisterReceiver() {
-        LocalBroadcastManager.getInstance(this)
-            .unregisterReceiver(receiver)
+        UpdateRouter.unregister(receiver)
     }
 
     override fun onResume() {
         super.onResume()
+        notificationSample.update()
         AdMob.loadAd(this, adView)
     }
 
@@ -127,23 +113,19 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.license -> LicenseActivity.start(this)
-            R.id.source_code -> openSourceCode(this)
-            R.id.privacy_policy -> openPrivacyPolicy(this)
-            R.id.play_store -> openGooglePlay(this)
+            R.id.source_code -> LaunchUtils.openSourceCode(this)
+            R.id.privacy_policy -> LaunchUtils.openPrivacyPolicy(this)
+            R.id.play_store -> LaunchUtils.openGooglePlay(this)
             R.id.relevant_ads -> AdMob.updateConsent(this)
         }
         return true
     }
 
     private fun setUpOrientationIcons() {
-        OrientationIdManager.list.forEach {
-            val orientation = it.orientation
-            val button = findViewById<View>(it.viewId)
-            buttonList.add(Pair(orientation, button))
-            button.setOnClickListener { setOrientation(orientation) }
+        notificationSample.buttonList.forEach { view ->
+            view.button.setOnClickListener { updateOrientation(view.orientation) }
         }
-        setOrientationIcon()
-        button_settings.visibility = View.GONE
+        notificationSample.update()
     }
 
     private fun toggleStatus() {
@@ -151,47 +133,36 @@ class MainActivity : AppCompatActivity() {
             MainService.stop(this)
             if (settings.shouldResident()) {
                 settings.setResident(false)
-                setResidentCheckBox()
+                applyResident()
             }
         } else {
             MainService.start(this)
         }
     }
 
-    private fun setStatusDescription() {
+    private fun applyStatus() {
         val enabled = orientationHelper.isEnabled
-        statusSwitch.isChecked = enabled
-        statusDescription.setText(if (enabled) R.string.status_running else R.string.status_waiting)
+        status_switch.isChecked = enabled
+        status_description.setText(if (enabled) R.string.status_running else R.string.status_waiting)
     }
 
     private fun toggleResident() {
         settings.setResident(!settings.shouldResident())
-        setResidentCheckBox()
+        applyResident()
         if (settings.shouldResident() && !orientationHelper.isEnabled) {
             MainService.start(this)
         }
     }
 
-    private fun setResidentCheckBox() {
-        residentCheckBox.isChecked = settings.shouldResident()
+    private fun applyResident() {
+        resident_switch.isChecked = settings.shouldResident()
     }
 
-    private fun setOrientation(orientation: Int) {
+    private fun updateOrientation(orientation: Int) {
         settings.orientation = orientation
-        setOrientationIcon()
+        notificationSample.update()
         if (orientationHelper.isEnabled) {
             MainService.start(this)
-        }
-    }
-
-    private fun setOrientationIcon() {
-        val orientation = settings.orientation
-        val selected = ContextCompat.getColor(this, R.color.bg_notification_selected)
-        val transparent = ContextCompat.getColor(this, android.R.color.transparent)
-        for (pair in buttonList) {
-            pair.second.run {
-                setBackgroundColor(if (orientation == pair.first) selected else transparent)
-            }
         }
     }
 
@@ -203,61 +174,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val PACKAGE_NAME = "net.mm2d.android.orientationfaker"
-        private const val ACTION_UPDATE = "ACTION_UPDATE"
         private const val REQUEST_CODE = 101
-        private const val PRIVACY_POLICY_URL =
-            "https://github.com/ohmae/orientation-faker/blob/develop/PRIVACY-POLICY.md"
-        private const val GITHUB_URL =
-            "https://github.com/ohmae/orientation-faker/"
-
-        fun notifyUpdate(context: Context) {
-            LocalBroadcastManager.getInstance(context)
-                .sendBroadcast(Intent(ACTION_UPDATE))
-        }
-
-        private fun openUri(context: Context, uri: String): Boolean {
-            try {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-                intent.addCategory(Intent.CATEGORY_BROWSABLE)
-                context.startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
-                Log.w(e)
-                return false
-            }
-            return true
-        }
-
-        private fun openCustomTabs(context: Context, uri: String): Boolean {
-            try {
-                val intent = CustomTabsIntent.Builder(CustomTabsHelper.session)
-                    .setShowTitle(true)
-                    .setToolbarColor(ContextCompat.getColor(context, R.color.primary))
-                    .build()
-                intent.intent.setPackage(CustomTabsHelper.packageNameToBind)
-                intent.launchUrl(context, Uri.parse(uri))
-            } catch (e: ActivityNotFoundException) {
-                Log.w(e)
-                return false
-            }
-            return true
-        }
-
-        private fun openGooglePlay(context: Context, packageName: String): Boolean {
-            return openUri(context, "market://details?id=$packageName") ||
-                    openCustomTabs(context, "https://play.google.com/store/apps/details?id=$packageName")
-        }
-
-        private fun openGooglePlay(context: Context): Boolean {
-            return openGooglePlay(context, PACKAGE_NAME)
-        }
-
-        private fun openPrivacyPolicy(context: Context) {
-            openCustomTabs(context, PRIVACY_POLICY_URL)
-        }
-
-        private fun openSourceCode(context: Context) {
-            openCustomTabs(context, GITHUB_URL)
-        }
     }
 }
