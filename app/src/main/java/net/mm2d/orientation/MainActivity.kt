@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpAdView() {
-        adView = AdMob.makeAdView(this)
+        adView = AdMob.makeSettingsAdView(this)
         container.addView(adView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
     }
 

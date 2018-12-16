@@ -15,7 +15,10 @@ import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.LinearLayout.LayoutParams
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.ads.AdView
+import kotlinx.android.synthetic.main.activity_detailed_settings.*
 import kotlinx.android.synthetic.main.layout_detailed_settings.*
 import net.mm2d.android.orientationfaker.R
 import net.mm2d.color.chooser.ColorChooserDialog
@@ -36,6 +39,7 @@ class DetailedSettingsActivity
         }
     }
     private lateinit var notificationSample: NotificationSample
+    private lateinit var adView: AdView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,11 +50,22 @@ class DetailedSettingsActivity
         setUpOrientationIcons()
         setUpNotificationPrivacy()
         UpdateRouter.register(receiver)
+        setUpAdView()
+    }
+
+    private fun setUpAdView() {
+        adView = AdMob.makeDetailedAdView(this)
+        container.addView(adView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
     }
 
     override fun onDestroy() {
         super.onDestroy()
         UpdateRouter.unregister(receiver)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AdMob.loadAd(this, adView)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

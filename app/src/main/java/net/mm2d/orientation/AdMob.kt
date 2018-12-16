@@ -30,6 +30,7 @@ import java.net.URL
 object AdMob {
     private const val APP_ID = "ca-app-pub-3057634395460859~4653069539"
     private const val UNIT_ID_SETTINGS = "ca-app-pub-3057634395460859/5509364941"
+    private const val UNIT_ID_DETAILED = "ca-app-pub-3057634395460859/9578179809"
     private const val PUBLISHER_ID = "pub-3057634395460859"
     private const val PRIVACY_POLICY_URL =
         "https://github.com/ohmae/orientation-faker/blob/develop/PRIVACY-POLICY.md"
@@ -41,10 +42,17 @@ object AdMob {
         MobileAds.initialize(context, APP_ID)
     }
 
-    fun makeAdView(context: Context): AdView {
+    fun makeSettingsAdView(context: Context): AdView {
         return AdView(context).apply {
             adSize = AdSize.SMART_BANNER
             adUnitId = UNIT_ID_SETTINGS
+        }
+    }
+
+    fun makeDetailedAdView(context: Context): AdView {
+        return AdView(context).apply {
+            adSize = AdSize.SMART_BANNER
+            adUnitId = UNIT_ID_DETAILED
         }
     }
 
