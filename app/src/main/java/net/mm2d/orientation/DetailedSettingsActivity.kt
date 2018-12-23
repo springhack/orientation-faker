@@ -45,10 +45,7 @@ class DetailedSettingsActivity
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detailed_settings)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        notificationSample = NotificationSample(this)
-        setUpSample()
-        setUpOrientationIcons()
-        setUpNotificationPrivacy()
+        setUpViews()
         UpdateRouter.register(receiver)
         setUpAdView()
     }
@@ -65,6 +62,7 @@ class DetailedSettingsActivity
 
     override fun onResume() {
         super.onResume()
+        notificationSample.update()
         AdMob.loadAd(this, adView)
     }
 
@@ -76,11 +74,17 @@ class DetailedSettingsActivity
         return super.onOptionsItemSelected(item)
     }
 
+    private fun setUpViews() {
+        notificationSample = NotificationSample(this)
+        setUpSample()
+        setUpOrientationIcons()
+        setUpNotificationPrivacy()
+    }
+
     private fun setUpOrientationIcons() {
         notificationSample.buttonList.forEach { view ->
             view.button.setOnClickListener { updateOrientation(view.orientation) }
         }
-        notificationSample.update()
     }
 
     private fun updateOrientation(orientation: Int) {
@@ -159,12 +163,7 @@ class DetailedSettingsActivity
     }
 
     private fun applyNotificationPrivacy() {
-        val notifySecret = settings.notifySecret
-        notification_privacy_switch.isChecked = notifySecret
-        notification_privacy_description.setText(
-            if (notifySecret) R.string.notification_privacy_on
-            else R.string.notification_privacy_off
-        )
+        notification_privacy.isChecked = settings.notifySecret
     }
 
     private fun toggleNotificationPrivacy() {

@@ -53,14 +53,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         supportActionBar?.title = getString(R.string.app_name)
-        notificationSample = NotificationSample(this)
-        status.setOnClickListener { toggleStatus() }
-        resident.setOnClickListener { toggleResident() }
-        detailed_setting.setOnClickListener { DetailedSettingsActivity.start(this) }
-        version_description.text = makeVersionInfo()
-        applyStatus()
-        applyResident()
-        setUpOrientationIcons()
+        setUpViews()
         UpdateRouter.register(receiver)
         if (!OverlayPermissionHelper.canDrawOverlays(this)) {
             MainService.stop(this)
@@ -121,11 +114,21 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    private fun setUpViews() {
+        notificationSample = NotificationSample(this)
+        status.setOnClickListener { toggleStatus() }
+        auto_start.setOnClickListener { toggleResident() }
+        detailed_setting.setOnClickListener { DetailedSettingsActivity.start(this) }
+        version_description.text = makeVersionInfo()
+        applyStatus()
+        applyResident()
+        setUpOrientationIcons()
+    }
+
     private fun setUpOrientationIcons() {
         notificationSample.buttonList.forEach { view ->
             view.button.setOnClickListener { updateOrientation(view.orientation) }
         }
-        notificationSample.update()
     }
 
     private fun toggleStatus() {
@@ -141,9 +144,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applyStatus() {
-        val enabled = orientationHelper.isEnabled
-        status_switch.isChecked = enabled
-        status_description.setText(if (enabled) R.string.status_running else R.string.status_waiting)
+        status.isChecked = orientationHelper.isEnabled
     }
 
     private fun toggleResident() {
@@ -155,7 +156,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applyResident() {
-        resident_switch.isChecked = settings.shouldResident()
+        auto_start.isChecked = settings.shouldResident()
     }
 
     private fun updateOrientation(orientation: Int) {
