@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         UpdateRouter.register(receiver)
         if (!OverlayPermissionHelper.canDrawOverlays(this)) {
             MainService.stop(this)
-        } else if (settings.shouldResident()) {
+        } else if (settings.shouldAutoStart()) {
             MainService.start(this)
         }
         setUpAdView()
@@ -117,11 +117,11 @@ class MainActivity : AppCompatActivity() {
     private fun setUpViews() {
         notificationSample = NotificationSample(this)
         status.setOnClickListener { toggleStatus() }
-        auto_start.setOnClickListener { toggleResident() }
+        auto_start.setOnClickListener { toggleAutoStart() }
         detailed_setting.setOnClickListener { DetailedSettingsActivity.start(this) }
         version_description.text = makeVersionInfo()
         applyStatus()
-        applyResident()
+        applyAutoStart()
         setUpOrientationIcons()
     }
 
@@ -134,9 +134,9 @@ class MainActivity : AppCompatActivity() {
     private fun toggleStatus() {
         if (orientationHelper.isEnabled) {
             MainService.stop(this)
-            if (settings.shouldResident()) {
-                settings.setResident(false)
-                applyResident()
+            if (settings.shouldAutoStart()) {
+                settings.setAutoStart(false)
+                applyAutoStart()
             }
         } else {
             MainService.start(this)
@@ -147,16 +147,16 @@ class MainActivity : AppCompatActivity() {
         status.isChecked = orientationHelper.isEnabled
     }
 
-    private fun toggleResident() {
-        settings.setResident(!settings.shouldResident())
-        applyResident()
-        if (settings.shouldResident() && !orientationHelper.isEnabled) {
+    private fun toggleAutoStart() {
+        settings.setAutoStart(!settings.shouldAutoStart())
+        applyAutoStart()
+        if (settings.shouldAutoStart() && !orientationHelper.isEnabled) {
             MainService.start(this)
         }
     }
 
-    private fun applyResident() {
-        auto_start.isChecked = settings.shouldResident()
+    private fun applyAutoStart() {
+        auto_start.isChecked = settings.shouldAutoStart()
     }
 
     private fun updateOrientation(orientation: Int) {
