@@ -76,7 +76,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'com.google.firebase:firebase-ads:17.1.2'
     implementation 'com.google.firebase:firebase-perf:16.2.3'
-    implementation 'com.google.android.ads.consent:consent-library:1.0.6'
+    implementation 'com.google.android.ads.consent:consent-library:1.0.7'
 }
 
 apply plugin: 'com.google.gms.google-services'
