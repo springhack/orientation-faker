@@ -21,7 +21,7 @@ import com.google.android.gms.ads.MobileAds
 import io.reactivex.Single
 import io.reactivex.subjects.SingleSubject
 import net.mm2d.android.orientationfaker.BuildConfig
-import net.mm2d.log.Log
+import net.mm2d.log.Logger
 import java.net.URL
 
 /**
@@ -168,7 +168,7 @@ object AdMob {
             }
 
             override fun onConsentFormError(errorDescription: String?) {
-                Log.e("error:$errorDescription")
+                Logger.e { "error:$errorDescription" }
                 subject?.onSuccess(ConsentStatus.UNKNOWN)
             }
         }
