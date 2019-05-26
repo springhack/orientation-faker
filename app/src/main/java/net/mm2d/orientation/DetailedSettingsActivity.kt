@@ -12,10 +12,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import android.widget.LinearLayout.LayoutParams
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.AdView
@@ -157,12 +155,8 @@ class DetailedSettingsActivity
     }
 
     private fun setUpNotificationPrivacy() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            notification_privacy.visibility = View.GONE
-        } else {
-            notification_privacy.setOnClickListener { toggleNotificationPrivacy() }
-            applyNotificationPrivacy()
-        }
+        notification_privacy.setOnClickListener { toggleNotificationPrivacy() }
+        applyNotificationPrivacy()
     }
 
     private fun applyNotificationPrivacy() {
@@ -184,10 +178,6 @@ class DetailedSettingsActivity
                 it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             })
         }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            system_notification.visibility = View.GONE
-            return
-        }
         system_notification.setOnClickListener {
             startActivity(Intent(ACTION_APP_NOTIFICATION_SETTINGS).also {
                 it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -199,7 +189,9 @@ class DetailedSettingsActivity
     }
 
     companion object {
-        private const val ACTION_APP_NOTIFICATION_SETTINGS = "android.settings.APP_NOTIFICATION_SETTINGS"
+        private const val ACTION_APP_NOTIFICATION_SETTINGS =
+            "android.settings.APP_NOTIFICATION_SETTINGS"
+
         fun start(context: Context) {
             context.startActivity(Intent(context, DetailedSettingsActivity::class.java))
         }
