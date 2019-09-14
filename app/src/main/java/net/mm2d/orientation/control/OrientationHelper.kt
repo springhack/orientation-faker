@@ -16,6 +16,7 @@ import android.os.Build.VERSION_CODES
 import android.view.View
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams
+import net.mm2d.orientation.review.ReviewRequest
 import net.mm2d.orientation.settings.Settings
 
 /**
@@ -43,23 +44,30 @@ class OrientationHelper private constructor(context: Context) {
             0, 0, 0, 0,
             type,
             LayoutParams.FLAG_NOT_FOCUSABLE
-                    or LayoutParams.FLAG_NOT_TOUCHABLE
-                    or LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    or LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                or LayoutParams.FLAG_NOT_TOUCHABLE
+                or LayoutParams.FLAG_NOT_TOUCH_MODAL
+                or LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
         )
         layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
 
     fun updateOrientation() {
+        ReviewRequest.initializeIfNeed()
         val settings = Settings.get()
-        layoutParams.screenOrientation = settings.orientation.let {
+        val orientation = settings.orientation.let {
             if (it == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED && settings.useFullSensor) {
                 ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
             } else {
                 it
             }
         }
+        if (orientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED &&
+            orientation != layoutParams.screenOrientation
+        ) {
+            settings.orientationChangeCount++
+        }
+        layoutParams.screenOrientation = orientation
         if (isEnabled) {
             windowManager.updateViewLayout(view, layoutParams)
         } else {

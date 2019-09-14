@@ -25,6 +25,7 @@ import net.mm2d.android.orientationfaker.BuildConfig
 import net.mm2d.android.orientationfaker.R
 import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.control.OverlayPermissionHelper
+import net.mm2d.orientation.review.ReviewRequest
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.util.LaunchUtils
 
@@ -151,6 +152,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyStatus() {
         status.isChecked = orientationHelper.isEnabled
+        ReviewRequest.requestReviewIfNeed(this)
     }
 
     private fun toggleAutoStart() {
@@ -175,9 +177,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun makeVersionInfo(): String {
         return BuildConfig.VERSION_NAME +
-                if (BuildConfig.DEBUG)
-                    " # " + DateFormat.format("yyyy/M/d kk:mm:ss", BuildConfig.BUILD_TIME)
-                else ""
+            if (BuildConfig.DEBUG)
+                " # " + DateFormat.format("yyyy/M/d kk:mm:ss", BuildConfig.BUILD_TIME)
+            else ""
     }
 
     companion object {
