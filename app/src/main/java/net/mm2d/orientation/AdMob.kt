@@ -42,18 +42,14 @@ object AdMob {
         MobileAds.initialize(context, APP_ID)
     }
 
-    fun makeSettingsAdView(context: Context): AdView {
-        return AdView(context).apply {
-            adSize = AdSize.SMART_BANNER
-            adUnitId = UNIT_ID_SETTINGS
-        }
+    fun makeSettingsAdView(context: Context): AdView = AdView(context).apply {
+        adSize = AdSize.SMART_BANNER
+        adUnitId = UNIT_ID_SETTINGS
     }
 
-    fun makeDetailedAdView(context: Context): AdView {
-        return AdView(context).apply {
-            adSize = AdSize.SMART_BANNER
-            adUnitId = UNIT_ID_DETAILED
-        }
+    fun makeDetailedAdView(context: Context): AdView = AdView(context).apply {
+        adSize = AdSize.SMART_BANNER
+        adUnitId = UNIT_ID_DETAILED
     }
 
     fun loadAd(activity: FragmentActivity, adView: AdView) {
@@ -67,9 +63,7 @@ object AdMob {
         }
     }
 
-    fun isInEeaOrUnknown(): Boolean {
-        return checked && isInEeaOrUnknown
-    }
+    fun isInEeaOrUnknown(): Boolean = checked && isInEeaOrUnknown
 
     fun updateConsent(activity: FragmentActivity) {
         showConsentForm(activity)
@@ -130,8 +124,7 @@ object AdMob {
             subject.onSuccess(ConsentStatus.PERSONALIZED)
             return true
         }
-        val status = consentStatus
-        when (status) {
+        when (val status = consentStatus) {
             ConsentStatus.NON_PERSONALIZED,
             ConsentStatus.PERSONALIZED -> {
                 subject.onSuccess(status)
@@ -159,8 +152,7 @@ object AdMob {
                 }
             }
 
-            override fun onConsentFormOpened() {
-            }
+            override fun onConsentFormOpened() = Unit
 
             override fun onConsentFormClosed(status: ConsentStatus?, userPrefersAdFree: Boolean?) {
                 consentStatus = status
