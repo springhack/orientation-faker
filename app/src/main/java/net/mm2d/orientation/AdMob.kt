@@ -131,7 +131,11 @@ object AdMob {
             }
             ConsentStatus.UNKNOWN,
             null -> {
-                showConsentForm(activity, subject)
+                try {
+                    showConsentForm(activity, subject)
+                } catch (e: Throwable) {
+                    subject.onError(e)
+                }
             }
         }
         return true

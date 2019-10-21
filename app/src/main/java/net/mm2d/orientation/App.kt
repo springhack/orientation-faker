@@ -11,6 +11,7 @@ import android.app.Application
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
+import com.crashlytics.android.Crashlytics
 import io.reactivex.exceptions.OnErrorNotImplementedException
 import io.reactivex.exceptions.UndeliverableException
 import io.reactivex.plugins.RxJavaPlugins
@@ -50,6 +51,7 @@ class App : Application() {
             else
             -> Logger.w(e)
         }
+        Crashlytics.logException(e)
     }
 
     private fun setUpLogger() {
