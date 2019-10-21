@@ -24,6 +24,7 @@
     <string name="detailed_settings">詳細設定</string>
     <string name="detailed_settings_description">通知のテーマや詳細な動作設定</string>
     <string name="version">バージョン</string>
+    <string name="caution">システム設定を自動回転に変更してください。逆向き設定ができない可能性があります</string>
 
     <string name="theme">テーマ</string>
     <string name="reset_theme">テーマをリセット</string>
@@ -31,6 +32,9 @@
     <string name="background_color">背景色</string>
     <string name="selected_foreground_color">選択前景色</string>
     <string name="selected_background_color">選択背景色</string>
+    <string name="auto_rotate_warning">システム設定警告</string>
+    <string name="auto_rotate_warning_on">システム設定が自動回転になっていない場合、警告を表示します</string>
+    <string name="auto_rotate_warning_off">システム設定が自動回転になっていなくても、警告を表示しません</string>
     <string name="use_full_sensor">強制自動回転</string>
     <string name="use_full_sensor_on">強制的に自動回転させます</string>
     <string name="use_full_sensor_off">表示されているアプリに従います</string>
@@ -54,6 +58,7 @@
     <string name="dialog_button_send_mail">問題報告</string>
 
     <string name="toast_could_not_open_setting">システムの設定画面を開けません</string>
+    <string name="toast_system_settings">システム設定を自動回転に変更してください</string>
 
     <string name="license">オープンソースライセンス</string>
     <string name="source_code">ソースコード</string>

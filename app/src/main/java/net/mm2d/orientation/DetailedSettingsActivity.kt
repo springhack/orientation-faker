@@ -30,9 +30,6 @@ class DetailedSettingsActivity
     private val settings by lazy {
         Settings.get()
     }
-    private val orientationHelper by lazy {
-        OrientationHelper.getInstance(this)
-    }
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             notificationSample.update()
@@ -78,6 +75,7 @@ class DetailedSettingsActivity
         notificationSample = NotificationSample(this)
         setUpSample()
         setUpOrientationIcons()
+        setUpAutoRotateWarning()
         setUpUseFullSensor()
         setUpNotificationPrivacy()
         setUpSystemSetting()
@@ -92,7 +90,7 @@ class DetailedSettingsActivity
     private fun updateOrientation(orientation: Int) {
         settings.orientation = orientation
         notificationSample.update()
-        if (orientationHelper.isEnabled) {
+        if (OrientationHelper.isEnabled) {
             MainService.start(this)
         }
     }
@@ -138,7 +136,7 @@ class DetailedSettingsActivity
             }
         }
         notificationSample.update()
-        if (orientationHelper.isEnabled) {
+        if (OrientationHelper.isEnabled) {
             MainService.start(this)
         }
     }
@@ -150,9 +148,23 @@ class DetailedSettingsActivity
         sample_foreground_selected.setColorFilter(settings.foregroundColorSelected)
         sample_background_selected.setColorFilter(settings.backgroundColorSelected)
         notificationSample.update()
-        if (orientationHelper.isEnabled) {
+        if (OrientationHelper.isEnabled) {
             MainService.start(this)
         }
+    }
+
+    private fun setUpAutoRotateWarning() {
+        auto_rotate_warning.setOnClickListener { toggleAutoRotateWarning() }
+        applyAutoRotateWarning()
+    }
+
+    private fun applyAutoRotateWarning() {
+        auto_rotate_warning.isChecked = settings.autoRotateWarning
+    }
+
+    private fun toggleAutoRotateWarning() {
+        settings.autoRotateWarning = !settings.autoRotateWarning
+        applyAutoRotateWarning()
     }
 
     private fun setUpUseFullSensor() {
@@ -168,7 +180,7 @@ class DetailedSettingsActivity
         settings.useFullSensor = !settings.useFullSensor
         applyUseFullSensor()
         notificationSample.update()
-        if (orientationHelper.isEnabled) {
+        if (OrientationHelper.isEnabled) {
             MainService.start(this)
         }
     }
@@ -185,7 +197,7 @@ class DetailedSettingsActivity
     private fun toggleNotificationPrivacy() {
         settings.notifySecret = !settings.notifySecret
         applyNotificationPrivacy()
-        if (orientationHelper.isEnabled) {
+        if (OrientationHelper.isEnabled) {
             MainService.start(this)
         }
     }
