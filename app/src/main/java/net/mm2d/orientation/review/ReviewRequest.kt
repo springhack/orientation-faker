@@ -8,6 +8,7 @@
 package net.mm2d.orientation.review
 
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
 import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.settings.Settings
 import java.util.concurrent.TimeUnit
@@ -31,6 +32,12 @@ object ReviewRequest {
     }
 
     fun requestReviewIfNeed(activity: FragmentActivity) {
+        if (!OrientationHelper.isEnabled) {
+            return
+        }
+        if (activity.lifecycle.currentState != Lifecycle.State.RESUMED) {
+            return
+        }
         val settings = Settings.get()
         if (settings.reported || settings.reviewed) {
             return
@@ -55,8 +62,6 @@ object ReviewRequest {
         if (settings.reviewCancelCount == 0) {
             settings.firstReviewTime = now
         }
-        if (OrientationHelper.isEnabled) {
-            ReviewDialog.showDialog(activity)
-        }
+        ReviewDialog.showDialog(activity)
     }
 }

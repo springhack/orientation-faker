@@ -8,7 +8,7 @@ apply plugin: "com.google.firebase.firebase-perf"
 def applicationName = "OrientationFaker"
 def versionMajor = 3
 def versionMinor = 0
-def versionPatch = 4
+def versionPatch = 5
 
 android {
     compileSdkVersion 29
@@ -24,6 +24,7 @@ android {
         vectorDrawables.useSupportLibrary = true
         buildConfigField "long", "BUILD_TIME", "${System.currentTimeMillis()}L"
         archivesBaseName = "${applicationName}-${versionName}"
+        multiDexEnabled true
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
