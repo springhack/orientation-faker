@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2018 大前良介 (OHMAE Ryosuke)
+ * Copyright (c) 2019 大前良介 (OHMAE Ryosuke)
  *
  * This software is released under the MIT License.
  * http://opensource.org/licenses/MIT
  */
 
-package net.mm2d.orientation
+package net.mm2d.orientation.view
 
 import android.app.Activity
 import android.graphics.Color
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import kotlinx.android.synthetic.main.layout_remote_views.*
 import net.mm2d.android.orientationfaker.R
 import net.mm2d.orientation.control.OrientationIdManager
 import net.mm2d.orientation.settings.Settings
@@ -28,7 +29,7 @@ class NotificationSample(activity: Activity) {
             activity.findViewById(it.titleViewId)
         )
     }
-    private val background = activity.findViewById<View>(R.id.notification)
+    private val background = activity.notification
 
     init {
         buttonList[buttonList.lastIndex].button.visibility = View.GONE

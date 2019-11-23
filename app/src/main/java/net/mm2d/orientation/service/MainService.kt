@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2018 大前良介 (OHMAE Ryosuke)
+ * Copyright (c) 2019 大前良介 (OHMAE Ryosuke)
  *
  * This software is released under the MIT License.
  * http://opensource.org/licenses/MIT
  */
 
-package net.mm2d.orientation
+package net.mm2d.orientation.service
 
 import android.app.Service
 import android.content.Context
@@ -15,7 +15,9 @@ import android.os.Build.VERSION_CODES
 import android.os.IBinder
 import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.control.OverlayPermissionHelper
-import net.mm2d.orientation.notification.NotificationHelper
+import net.mm2d.orientation.util.UpdateRouter
+import net.mm2d.orientation.view.notification.NotificationHelper
+import net.mm2d.orientation.view.widget.WidgetProvider
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
@@ -59,18 +61,27 @@ class MainService : Service() {
         private const val ACTION_STOP = "ACTION_STOP"
 
         fun start(context: Context) {
-            startService(context, ACTION_START)
+            WidgetProvider.start(context)
+            startService(
+                context,
+                ACTION_START
+            )
         }
 
         fun stop(context: Context) {
+            WidgetProvider.stop(context)
             if (!OrientationHelper.isEnabled) {
                 return
             }
-            startService(context, ACTION_STOP)
+            startService(
+                context,
+                ACTION_STOP
+            )
         }
 
         private fun startService(context: Context, action: String) {
-            val intent = makeIntent(context, action)
+            val intent =
+                makeIntent(context, action)
             if (VERSION.SDK_INT >= VERSION_CODES.O) {
                 context.startForegroundService(intent)
             } else {
