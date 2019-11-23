@@ -32,6 +32,7 @@ import net.mm2d.orientation.control.OverlayPermissionHelper
 import net.mm2d.orientation.review.ReviewRequest
 import net.mm2d.orientation.service.MainService
 import net.mm2d.orientation.settings.Settings
+import net.mm2d.orientation.util.AdMob
 import net.mm2d.orientation.util.LaunchUtils
 import net.mm2d.orientation.util.UpdateRouter
 

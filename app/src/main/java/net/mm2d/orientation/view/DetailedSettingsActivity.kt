@@ -25,6 +25,7 @@ import net.mm2d.color.chooser.ColorChooserDialog
 import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.service.MainService
 import net.mm2d.orientation.settings.Settings
+import net.mm2d.orientation.util.AdMob
 import net.mm2d.orientation.util.UpdateRouter
 import net.mm2d.orientation.view.dialog.ResetThemeDialog
 

@@ -5,7 +5,7 @@
  * http://opensource.org/licenses/MIT
  */
 
-package net.mm2d.orientation
+package net.mm2d.orientation.util
 
 import android.content.Context
 import android.os.Bundle

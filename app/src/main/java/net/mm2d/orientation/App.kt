@@ -23,6 +23,7 @@ import net.mm2d.orientation.service.KeepAlive
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.tabs.CustomTabsBinder
 import net.mm2d.orientation.tabs.CustomTabsHelper
+import net.mm2d.orientation.util.AdMob
 import net.mm2d.orientation.util.UpdateRouter
 
 /**
