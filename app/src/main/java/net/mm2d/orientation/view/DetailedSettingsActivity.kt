@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 大前良介 (OHMAE Ryosuke)
+ * Copyright (c) 2018 大前良介 (OHMAE Ryosuke)
  *
  * This software is released under the MIT License.
  * http://opensource.org/licenses/MIT
@@ -8,7 +8,6 @@
 package net.mm2d.orientation.view
 
 import android.app.Activity
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -23,10 +22,11 @@ import net.mm2d.android.orientationfaker.BuildConfig
 import net.mm2d.android.orientationfaker.R
 import net.mm2d.color.chooser.ColorChooserDialog
 import net.mm2d.orientation.control.OrientationHelper
+import net.mm2d.orientation.event.EventObserver
+import net.mm2d.orientation.event.EventRouter
 import net.mm2d.orientation.service.MainService
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.util.AdMob
-import net.mm2d.orientation.util.UpdateRouter
 import net.mm2d.orientation.view.dialog.ResetThemeDialog
 
 class DetailedSettingsActivity
@@ -34,11 +34,7 @@ class DetailedSettingsActivity
     private val settings by lazy {
         Settings.get()
     }
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            notificationSample.update()
-        }
-    }
+    private val eventObserver: EventObserver = EventRouter.createUpdateObserver()
     private lateinit var notificationSample: NotificationSample
     private lateinit var adView: AdView
 
@@ -47,7 +43,7 @@ class DetailedSettingsActivity
         setContentView(R.layout.activity_detailed_settings)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setUpViews()
-        UpdateRouter.register(receiver)
+        eventObserver.subscribe { notificationSample.update() }
         setUpAdView()
     }
 
@@ -58,7 +54,7 @@ class DetailedSettingsActivity
 
     override fun onDestroy() {
         super.onDestroy()
-        UpdateRouter.unregister(receiver)
+        eventObserver.unsubscribe()
     }
 
     override fun onResume() {

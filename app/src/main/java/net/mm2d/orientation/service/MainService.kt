@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 大前良介 (OHMAE Ryosuke)
+ * Copyright (c) 2018 大前良介 (OHMAE Ryosuke)
  *
  * This software is released under the MIT License.
  * http://opensource.org/licenses/MIT
@@ -15,7 +15,7 @@ import android.os.Build.VERSION_CODES
 import android.os.IBinder
 import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.control.OverlayPermissionHelper
-import net.mm2d.orientation.util.UpdateRouter
+import net.mm2d.orientation.event.EventRouter
 import net.mm2d.orientation.view.notification.NotificationHelper
 import net.mm2d.orientation.view.widget.WidgetProvider
 
@@ -46,13 +46,13 @@ class MainService : Service() {
 
     private fun start() {
         OrientationHelper.updateOrientation()
-        UpdateRouter.send()
+        EventRouter.notifyUpdate()
     }
 
     private fun stop() {
         NotificationHelper.stopForeground(this)
         OrientationHelper.cancel()
-        UpdateRouter.send()
+        EventRouter.notifyUpdate()
         stopSelf()
     }
 

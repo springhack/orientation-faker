@@ -24,7 +24,6 @@ import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.tabs.CustomTabsBinder
 import net.mm2d.orientation.tabs.CustomTabsHelper
 import net.mm2d.orientation.util.AdMob
-import net.mm2d.orientation.util.UpdateRouter
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
@@ -37,7 +36,6 @@ class App : Application() {
         setStrictMode()
         RxJavaPlugins.setErrorHandler(::logError)
         Settings.initialize(this)
-        UpdateRouter.initialize(this)
         CustomTabsHelper.initialize(this)
         registerActivityLifecycleCallbacks(CustomTabsBinder())
         KeepAlive.ensureResident(this)

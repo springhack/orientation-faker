@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 大前良介 (OHMAE Ryosuke)
+ * Copyright (c) 2014 大前良介 (OHMAE Ryosuke)
  *
  * This software is released under the MIT License.
  * http://opensource.org/licenses/MIT
@@ -7,8 +7,6 @@
 
 package net.mm2d.orientation.view
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -29,12 +27,13 @@ import net.mm2d.android.orientationfaker.BuildConfig
 import net.mm2d.android.orientationfaker.R
 import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.control.OverlayPermissionHelper
+import net.mm2d.orientation.event.EventObserver
+import net.mm2d.orientation.event.EventRouter
 import net.mm2d.orientation.review.ReviewRequest
 import net.mm2d.orientation.service.MainService
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.util.AdMob
 import net.mm2d.orientation.util.LaunchUtils
-import net.mm2d.orientation.util.UpdateRouter
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
@@ -45,12 +44,7 @@ class MainActivity : AppCompatActivity() {
     }
     private val handler = Handler(Looper.getMainLooper())
     private val checkSystemSettingsTask = Runnable { checkSystemSettings() }
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            applyStatus()
-            notificationSample.update()
-        }
-    }
+    private val eventObserver: EventObserver = EventRouter.createUpdateObserver()
     private lateinit var notificationSample: NotificationSample
     private lateinit var adView: AdView
     private lateinit var relevantAds: MenuItem
@@ -60,7 +54,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         supportActionBar?.title = getString(R.string.app_name)
         setUpViews()
-        UpdateRouter.register(receiver)
+        eventObserver.subscribe {
+            applyStatus()
+            notificationSample.update()
+        }
         if (!OverlayPermissionHelper.canDrawOverlays(this)) {
             MainService.stop(this)
         } else {
@@ -96,7 +93,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        UpdateRouter.unregister(receiver)
+        eventObserver.unsubscribe()
     }
 
     override fun onResume() {
@@ -186,7 +183,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applyStatus() {
-        status.isChecked = OrientationHelper.isEnabled
+        if (OrientationHelper.isEnabled) {
+            status_button.setText(R.string.status_stop)
+            status_button.setBackgroundResource(R.drawable.bg_stop_button)
+            status_description.setText(R.string.status_running)
+        } else {
+            status_button.setText(R.string.status_start)
+            status_button.setBackgroundResource(R.drawable.bg_start_button)
+            status_description.setText(R.string.status_waiting)
+        }
         ReviewRequest.requestReviewIfNeed(this)
     }
 
