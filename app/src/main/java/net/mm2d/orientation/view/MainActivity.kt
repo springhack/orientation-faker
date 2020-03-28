@@ -11,14 +11,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings.System
 import android.text.format.DateFormat
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout.LayoutParams
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle.State
 import com.google.android.gms.ads.AdView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -34,6 +32,7 @@ import net.mm2d.orientation.service.MainService
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.util.AdMob
 import net.mm2d.orientation.util.LaunchUtils
+import net.mm2d.orientation.util.SystemSettings
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
@@ -61,10 +60,8 @@ class MainActivity : AppCompatActivity() {
         if (!OverlayPermissionHelper.canDrawOverlays(this)) {
             MainService.stop(this)
         } else {
-            Settings.doOnGet {
-                if (it.shouldAutoStart()) {
-                    MainService.start(this)
-                }
+            if (Settings.get().shouldAutoStart()) {
+                MainService.start(this)
             }
         }
         setUpAdView()
@@ -102,6 +99,8 @@ class MainActivity : AppCompatActivity() {
         AdMob.loadAd(this, adView)
         handler.removeCallbacks(checkSystemSettingsTask)
         handler.post(checkSystemSettingsTask)
+        applyStatus()
+        applyAutoStart()
     }
 
     override fun onPause() {
@@ -117,16 +116,8 @@ class MainActivity : AppCompatActivity() {
             caution.visibility = View.GONE
             return
         }
-        kotlin.runCatching {
-            val fixed = System.getInt(contentResolver, System.ACCELEROMETER_ROTATION) == 0
-            if (fixed != caution.isVisible) {
-                caution.visibility = if (fixed) View.VISIBLE else View.GONE
-            }
-            handler.postDelayed(
-                checkSystemSettingsTask,
-                CHECK_INTERVAL
-            )
-        }
+        caution.visibility = if (SystemSettings.rotationIsFixed(this)) View.VISIBLE else View.GONE
+        handler.postDelayed(checkSystemSettingsTask, CHECK_INTERVAL)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -158,10 +149,6 @@ class MainActivity : AppCompatActivity() {
         detailed_setting.setOnClickListener { DetailedSettingsActivity.start(this) }
         version_description.text = makeVersionInfo()
         setUpOrientationIcons()
-        applyStatus()
-        Settings.doOnGet {
-            applyAutoStart()
-        }
     }
 
     private fun setUpOrientationIcons() {
@@ -210,9 +197,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateOrientation(orientation: Int) {
         settings.orientation = orientation
         notificationSample.update()
-        if (OrientationHelper.isEnabled) {
-            MainService.start(this)
-        }
+        MainService.update(this)
     }
 
     private fun makeVersionInfo(): String {

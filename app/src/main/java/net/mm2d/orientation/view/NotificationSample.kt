@@ -14,16 +14,16 @@ import android.widget.ImageView
 import android.widget.TextView
 import kotlinx.android.synthetic.main.layout_remote_views.*
 import net.mm2d.android.orientationfaker.R
-import net.mm2d.orientation.control.OrientationIdManager
+import net.mm2d.orientation.control.Orientations
 import net.mm2d.orientation.settings.Settings
+import net.mm2d.orientation.view.widget.ViewIds
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
  */
 class NotificationSample(activity: Activity) {
-    val buttonList: List<ButtonInfo> = OrientationIdManager.list.map {
+    val buttonList: List<ButtonInfo> = ViewIds.list.map {
         ButtonInfo(
-            it.orientation,
             activity.findViewById(it.viewId),
             activity.findViewById(it.iconViewId),
             activity.findViewById(it.titleViewId)
@@ -32,37 +32,48 @@ class NotificationSample(activity: Activity) {
     private val background = activity.notification
 
     init {
-        buttonList[buttonList.lastIndex].button.visibility = View.GONE
+        activity.findViewById<View>(R.id.remote_views_button_settings).visibility = View.GONE
     }
 
     fun update() {
-        Settings.doOnGet { settings ->
-            val orientation = settings.orientation
-            val foreground = settings.foregroundColor
-            background.setBackgroundColor(settings.backgroundColor)
-            val selectedForeground = settings.foregroundColorSelected
-            val selectedBackground = settings.backgroundColorSelected
-            buttonList.forEach {
-                if (it.orientation == orientation) {
-                    it.button.setBackgroundColor(selectedBackground)
-                    it.icon.setColorFilter(selectedForeground)
-                    it.title.setTextColor(selectedForeground)
-                } else {
-                    it.button.setBackgroundColor(Color.TRANSPARENT)
-                    it.icon.setColorFilter(foreground)
-                    it.title.setTextColor(foreground)
-                }
+        val settings = Settings.get()
+        val orientation = settings.orientation
+        val foreground = settings.foregroundColor
+        background.setBackgroundColor(settings.backgroundColor)
+        val selectedForeground = settings.foregroundColorSelected
+        val selectedBackground = settings.backgroundColorSelected
+        val orientationList = settings.orientationList
+        orientationList.forEachIndexed { index, value ->
+            val button = buttonList[index]
+            Orientations.values.find { it.value == value }?.let {
+                button.icon.setImageResource(it.icon)
+                button.title.setText(it.label)
+                button.orientation = value
             }
-            buttonList[0].title.setText(
-                if (settings.useFullSensor) R.string.force_auto else R.string.unspecified
-            )
+        }
+        val selectedIndex = orientationList.indexOf(orientation)
+        buttonList.forEachIndexed { index, it ->
+            if (index == selectedIndex) {
+                it.button.setBackgroundColor(selectedBackground)
+                it.icon.setColorFilter(selectedForeground)
+                it.title.setTextColor(selectedForeground)
+            } else {
+                it.button.setBackgroundColor(Color.TRANSPARENT)
+                it.icon.setColorFilter(foreground)
+                it.title.setTextColor(foreground)
+            }
+            if (index < orientationList.size) {
+                it.button.visibility = View.VISIBLE
+            } else {
+                it.button.visibility = View.GONE
+            }
         }
     }
 
     class ButtonInfo(
-        val orientation: Int,
         val button: View,
         val icon: ImageView,
-        val title: TextView
+        val title: TextView,
+        var orientation: Int = Orientations.SCREEN_ORIENTATION_INVALID
     )
 }
