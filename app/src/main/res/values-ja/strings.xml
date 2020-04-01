@@ -16,6 +16,15 @@
     <string name="sensor_portrait">縦自動</string>
     <string name="sensor_landscape">横自動</string>
 
+    <string name="description_unspecified">アプリからは画面の向きを指定しません。表示されているアプリ本来の向きになります</string>
+    <string name="description_force_sensor">センサーの情報を元に回転させます</string>
+    <string name="description_portrait">縦方向に固定します</string>
+    <string name="description_landscape">横方向に固定します</string>
+    <string name="description_reverse_portrait">逆向きの縦方向に固定します</string>
+    <string name="description_reverse_landscape">逆向きの横方向に固定します</string>
+    <string name="description_sensor_portrait">縦方向固定し、上下はセンサーによって反転させます</string>
+    <string name="description_sensor_landscape">横方向固定し、上下はセンサーによって反転させます</string>
+
     <string name="status">状態</string>
     <string name="status_running">実行中</string>
     <string name="status_waiting">待機中</string>
@@ -31,7 +40,7 @@
     <string name="caution_experimental">「縦自動」「横自動」は試験的機能です。何らかの問題が発生する可能性があります</string>
 
     <string name="reset_theme">テーマをリセット</string>
-    <string name="reset_button">ボタンをリセット</string>
+    <string name="reset_layout">ボタン配置をリセット</string>
     <string name="foreground_color">前景色</string>
     <string name="background_color">背景色</string>
     <string name="selected_foreground_color">選択前景色</string>
@@ -52,11 +61,12 @@
 
     <string name="dialog_title_reset_theme">確認</string>
     <string name="dialog_message_reset_theme">テーマをリセットします。\nよろしいですか？</string>
-    <string name="dialog_title_reset_orientation">確認</string>
-    <string name="dialog_message_reset_orientation">ボタンをリセットします。\nよろしいですか？</string>
+    <string name="dialog_title_reset_layout">確認</string>
+    <string name="dialog_message_reset_layout">ボタン配置をリセットします。\nよろしいですか？</string>
     <string name="dialog_title_permission">許可が必要です</string>
     <string name="dialog_message_permission">「他のアプリの上に重ねて表示」の許可が必要です。\nGoエディションの端末では許可を与えられない可能性があります。その場合このアプリを使用することはできません。アンインストールしてください</string>
     <string name="dialog_button_open_settings">設定を開く</string>
+    <string name="dialog_title_help">機能説明</string>
 
     <string name="dialog_title_review">ご満足いただけましたか？</string>
     <string name="dialog_message_review">５つ星評価で応援をお願いします\n問題があれば報告いただけますと幸いです</string>
@@ -65,7 +75,7 @@
 
     <string name="toast_could_not_open_setting">システムの設定画面を開けません</string>
     <string name="toast_system_settings">システム設定を自動回転に変更してください</string>
-    <string name="toast_select_item_max">最大5つまでです</string>
+    <string name="toast_select_item_max">5つ以上追加できません</string>
     <string name="toast_select_item_min">最低1つ必要です</string>
     <string name="toast_fail_to_initialize_sensor">加速度センサーの初期化に失敗しました</string>
 

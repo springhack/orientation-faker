@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
             applyStatus()
             notificationSample.update()
         }
-        if (!OverlayPermissionHelper.canDrawOverlays(this)) {
+        if (!SystemSettings.canDrawOverlays(this)) {
             MainService.stop(this)
         } else {
             if (Settings.get().shouldAutoStart()) {

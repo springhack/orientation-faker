@@ -10,8 +10,6 @@ package net.mm2d.orientation.view
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ActivityInfo
-import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -21,11 +19,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.AdView
 import kotlinx.android.synthetic.main.activity_detailed_settings.*
 import kotlinx.android.synthetic.main.layout_detailed_settings.*
-import net.mm2d.android.orientationfaker.BuildConfig
 import net.mm2d.android.orientationfaker.R
 import net.mm2d.color.chooser.ColorChooserDialog
+import net.mm2d.orientation.control.Orientation
 import net.mm2d.orientation.control.OrientationHelper
-import net.mm2d.orientation.control.Orientations
 import net.mm2d.orientation.event.EventObserver
 import net.mm2d.orientation.event.EventRouter
 import net.mm2d.orientation.service.MainService
@@ -33,13 +30,15 @@ import net.mm2d.orientation.settings.Default
 import net.mm2d.orientation.settings.OrientationList
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.util.AdMob
-import net.mm2d.orientation.view.dialog.ResetButtonDialog
+import net.mm2d.orientation.util.SystemSettings
+import net.mm2d.orientation.view.dialog.OrientationHelpDialog
+import net.mm2d.orientation.view.dialog.ResetLayoutDialog
 import net.mm2d.orientation.view.dialog.ResetThemeDialog
 import net.mm2d.orientation.view.view.CheckItemView
 
 class DetailedSettingsActivity : AppCompatActivity(),
     ResetThemeDialog.Callback,
-    ResetButtonDialog.Callback,
+    ResetLayoutDialog.Callback,
     ColorChooserDialog.Callback {
     private val settings by lazy {
         Settings.get()
@@ -47,8 +46,8 @@ class DetailedSettingsActivity : AppCompatActivity(),
     private val eventObserver: EventObserver = EventRouter.createUpdateObserver()
     private lateinit var notificationSample: NotificationSample
     private lateinit var checkList: List<CheckItemView>
-    private val orientationList: MutableList<Int> = mutableListOf()
     private lateinit var orientationListStart: List<Int>
+    private val orientationList: MutableList<Int> = mutableListOf()
     private lateinit var adView: AdView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +86,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
     override fun onResume() {
         super.onResume()
         notificationSample.update()
-        applyOrientationSelection()
+        applyLayoutSelection()
         applyUseBlankIcon()
         applyAutoRotateWarning()
         applyNotificationPrivacy()
@@ -105,7 +104,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
     private fun setUpViews() {
         notificationSample = NotificationSample(this)
         setUpSample()
-        setUpOrientationSelector()
+        setUpLayoutSelector()
         setUpUseBlankIcon()
         setUpAutoRotateWarning()
         setUpNotificationPrivacy()
@@ -179,7 +178,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
         MainService.update(this)
     }
 
-    private fun setUpOrientationSelector() {
+    private fun setUpLayoutSelector() {
         orientationListStart = settings.orientationList
         orientationList.addAll(orientationListStart)
         checkList = listOf(
@@ -193,8 +192,8 @@ class DetailedSettingsActivity : AppCompatActivity(),
             check_orientation8
         )
         checkList.forEachIndexed { index, view ->
-            val orientation = Orientations.values[index]
-            view.orientation = orientation.value
+            val orientation = Orientation.values[index]
+            view.orientation = orientation.orientation
             view.setIcon(orientation.icon)
             view.setText(orientation.label)
         }
@@ -204,15 +203,14 @@ class DetailedSettingsActivity : AppCompatActivity(),
                 updateCaution()
             }
         }
-        applyOrientationSelection()
-        reset_button.setOnClickListener { ResetButtonDialog.show(this) }
+        applyLayoutSelection()
+        reset_layout.setOnClickListener { ResetLayoutDialog.show(this) }
+        help_layout.setOnClickListener { OrientationHelpDialog.show(this) }
         updateCaution()
     }
 
     private fun updateCaution() {
-        if (orientationList.contains(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT) ||
-            orientationList.contains(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE)
-        ) {
+        if (orientationList.any { Orientation.experimental.contains(it) }) {
             caution.visibility = View.VISIBLE
         } else {
             caution.visibility = View.GONE
@@ -226,7 +224,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
             } else {
                 orientationList.remove(view.orientation)
                 view.isChecked = false
-                updateOrientationSelector()
+                updateLayoutSelector()
             }
         } else {
             if (orientationList.size >= OrientationList.MAX) {
@@ -234,25 +232,25 @@ class DetailedSettingsActivity : AppCompatActivity(),
             } else {
                 orientationList.add(view.orientation)
                 view.isChecked = true
-                updateOrientationSelector()
+                updateLayoutSelector()
             }
         }
     }
 
-    private fun updateOrientationSelector() {
+    private fun updateLayoutSelector() {
         settings.orientationList = orientationList
         notificationSample.update()
         MainService.update(this)
     }
 
-    override fun resetOrientation() {
+    override fun resetLayout() {
         orientationList.clear()
         orientationList.addAll(Default.orientationList)
-        applyOrientationSelection()
-        updateOrientationSelector()
+        applyLayoutSelection()
+        updateLayoutSelector()
     }
 
-    private fun applyOrientationSelection() {
+    private fun applyLayoutSelection() {
         checkList.forEach { view ->
             view.isChecked = orientationList.contains(view.orientation)
         }
@@ -301,27 +299,14 @@ class DetailedSettingsActivity : AppCompatActivity(),
 
     private fun setUpSystemSetting() {
         system_app.setOnClickListener {
-            startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).also {
-                it.data = Uri.parse("package:" + BuildConfig.APPLICATION_ID)
-                it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            })
+            SystemSettings.startApplicationDetailsSettings(this)
         }
         system_notification.setOnClickListener {
-            runCatching {
-                startActivity(Intent(ACTION_APP_NOTIFICATION_SETTINGS).also {
-                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    it.putExtra("app_package", BuildConfig.APPLICATION_ID)
-                    it.putExtra("app_uid", applicationInfo.uid)
-                    it.putExtra("android.provider.extra.APP_PACKAGE", BuildConfig.APPLICATION_ID)
-                })
-            }
+            SystemSettings.startAppNotificationSettings(this)
         }
     }
 
     companion object {
-        private const val ACTION_APP_NOTIFICATION_SETTINGS =
-            "android.settings.APP_NOTIFICATION_SETTINGS"
-
         fun start(context: Context) {
             context.startActivity(Intent(context, DetailedSettingsActivity::class.java))
         }

@@ -16,6 +16,15 @@
     <string name="sensor_portrait">sensor port</string>
     <string name="sensor_landscape">sensor land</string>
 
+    <string name="description_unspecified">Unspecified orientation from this app. Device will be the original orientation of the displayed app</string>
+    <string name="description_force_sensor">Rotate based on sensor information</string>
+    <string name="description_portrait">Fixed to portrait</string>
+    <string name="description_landscape">Fixed to landscape</string>
+    <string name="description_reverse_portrait">Fixed to reverse portrait</string>
+    <string name="description_reverse_landscape">Fixed to reverse landscape</string>
+    <string name="description_sensor_portrait">Fixed to portrait, automatically flip upside down by sensor</string>
+    <string name="description_sensor_landscape">Fixed to landscape, automatically flip upside down by sensor</string>
+
     <string name="status">Status</string>
     <string name="status_running">Running</string>
     <string name="status_waiting">Waiting</string>
@@ -31,7 +40,7 @@
     <string name="caution_experimental">\"sensor port\" and \"sensor land\" are experimental features. Some problems may occur</string>
 
     <string name="reset_theme">Reset theme</string>
-    <string name="reset_button">Reset button</string>
+    <string name="reset_layout">Reset button layout</string>
     <string name="foreground_color">foreground</string>
     <string name="background_color">background</string>
     <string name="selected_foreground_color">*foreground</string>
@@ -52,11 +61,12 @@
 
     <string name="dialog_title_reset_theme">Confirmation</string>
     <string name="dialog_message_reset_theme">Would you like to reset theme?</string>
-    <string name="dialog_title_reset_orientation">Confirmation</string>
-    <string name="dialog_message_reset_orientation">Would you like to reset buttons?</string>
+    <string name="dialog_title_reset_layout">Confirmation</string>
+    <string name="dialog_message_reset_layout">Would you like to reset button layout?</string>
     <string name="dialog_title_permission">Permission required</string>
     <string name="dialog_message_permission">To use this app, need to allow \"display over other apps\".\nGo edition devices may not be able to grant permission. In that case, you cannot use this app, so please uninstall this app.</string>
     <string name="dialog_button_open_settings">Go settings</string>
+    <string name="dialog_title_help">Feature Description</string>
 
     <string name="dialog_title_review">Are you satisfied?</string>
     <string name="dialog_message_review">Please cheer me up by 5-stars review.\nIf there is a problem, please report it to me</string>
@@ -65,7 +75,7 @@
 
     <string name="toast_could_not_open_setting">Could not open system setting</string>
     <string name="toast_system_settings">Please change the system setting to auto-rotate</string>
-    <string name="toast_select_item_max">Up to 5</string>
+    <string name="toast_select_item_max">Cannot add more than 5</string>
     <string name="toast_select_item_min">At least one is required</string>
     <string name="toast_fail_to_initialize_sensor">Accelerometer initialization failed</string>
 
