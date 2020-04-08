@@ -19,14 +19,15 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
-import android.os.PowerManager
 import android.view.View
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams
 import android.widget.Toast
+import androidx.core.content.getSystemService
 import net.mm2d.android.orientationfaker.R
 import net.mm2d.orientation.review.ReviewRequest
 import net.mm2d.orientation.settings.Settings
+import net.mm2d.orientation.util.PowerUtils
 import net.mm2d.orientation.util.SystemSettings
 import kotlin.math.abs
 import kotlin.math.atan
@@ -40,13 +41,12 @@ object OrientationHelper {
     private lateinit var view: View
     private lateinit var windowManager: WindowManager
     private lateinit var layoutParams: LayoutParams
-    private val settings: Settings by lazy { Settings.get() }
+    private var orientation: Int = Orientation.INVALID
     private var sensorManager: SensorManager? = null
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
             if (!isEnabled) return
-            val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return
-            if (pm.isInteractive && settings.orientation.usesSensor()) {
+            if (PowerUtils.isInteractive(context) && orientation.usesSensor()) {
                 startSensor()
             } else {
                 stopSensor()
@@ -61,15 +61,6 @@ object OrientationHelper {
         }
     }
 
-    private fun Int.usesSensor(): Boolean =
-        Orientation.sensor.contains(this)
-
-    private fun Int.isPortrait(): Boolean =
-        Orientation.portrait.contains(this)
-
-    private fun Int.isLandscape(): Boolean =
-        Orientation.landscape.contains(this)
-
     val isEnabled: Boolean
         get() = view.parent != null
 
@@ -83,7 +74,7 @@ object OrientationHelper {
         val appContext = context.applicationContext
         this.context = appContext
         view = View(appContext)
-        windowManager = appContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        windowManager = appContext.getSystemService()!!
         layoutParams = LayoutParams(
             0, 0, 0, 0,
             type,
@@ -100,25 +91,36 @@ object OrientationHelper {
         })
     }
 
-    fun updateOrientation() {
-        ReviewRequest.initializeIfNeed()
-        val orientation = settings.orientation
+    fun update(orientation: Int) {
+        this.orientation = orientation
+        ReviewRequest.updateOrientation(orientation)
         notifySystemSettingsIfNeed(orientation)
-        if (orientation != Orientation.UNSPECIFIED &&
-            orientation != layoutParams.screenOrientation
-        ) {
-            settings.orientationChangeCount++
-        }
         if (orientation.usesSensor()) {
             if (!isEnabled) {
                 setOrientation(Orientation.UNSPECIFIED)
             }
-            startSensor()
+            if (PowerUtils.isInteractive(context)) {
+                startSensor()
+            }
         } else {
             stopSensor()
             setOrientation(orientation)
         }
     }
+
+    fun cancel() {
+        if (isEnabled) {
+            windowManager.removeViewImmediate(view)
+        }
+        stopSensor()
+    }
+
+    fun getOrientation(): Int =
+        if (isEnabled) {
+            orientation
+        } else {
+            Settings.get().orientation
+        }
 
     private fun setOrientation(orientation: Int) {
         layoutParams.screenOrientation = orientation
@@ -130,7 +132,7 @@ object OrientationHelper {
     }
 
     private fun setSensorOrientation(x: Float, y: Float, z: Float) {
-        if (settings.orientation == Orientation.SENSOR_PORTRAIT) {
+        if (orientation == Orientation.SENSOR_PORTRAIT) {
             if (!layoutParams.screenOrientation.isPortrait()) {
                 if (y > 0) {
                     setOrientation(Orientation.PORTRAIT)
@@ -139,7 +141,7 @@ object OrientationHelper {
                 }
                 return
             }
-        } else if (settings.orientation == Orientation.SENSOR_LANDSCAPE) {
+        } else if (orientation == Orientation.SENSOR_LANDSCAPE) {
             if (!layoutParams.screenOrientation.isLandscape()) {
                 if (x > 0) {
                     setOrientation(Orientation.LANDSCAPE)
@@ -154,11 +156,11 @@ object OrientationHelper {
         }
         val orientation = calculateOrientation(x, y)
         if (layoutParams.screenOrientation == orientation) return
-        if (settings.orientation == Orientation.SENSOR_PORTRAIT) {
+        if (orientation == Orientation.SENSOR_PORTRAIT) {
             if (orientation.isPortrait()) {
                 setOrientation(orientation)
             }
-        } else if (settings.orientation == Orientation.SENSOR_LANDSCAPE) {
+        } else if (orientation == Orientation.SENSOR_LANDSCAPE) {
             if (orientation.isLandscape()) {
                 setOrientation(orientation)
             }
@@ -180,7 +182,7 @@ object OrientationHelper {
 
     private fun startSensor() {
         if (sensorManager != null) return
-        val manager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+        val manager: SensorManager? = context.getSystemService()
         if (manager == null) {
             Toast.makeText(context, R.string.toast_fail_to_initialize_sensor, Toast.LENGTH_LONG).show()
             return
@@ -211,10 +213,12 @@ object OrientationHelper {
         }
     }
 
-    fun cancel() {
-        if (isEnabled) {
-            windowManager.removeViewImmediate(view)
-        }
-        stopSensor()
-    }
+    private fun Int.usesSensor(): Boolean =
+        Orientation.sensor.contains(this)
+
+    private fun Int.isPortrait(): Boolean =
+        Orientation.portrait.contains(this)
+
+    private fun Int.isLandscape(): Boolean =
+        Orientation.landscape.contains(this)
 }

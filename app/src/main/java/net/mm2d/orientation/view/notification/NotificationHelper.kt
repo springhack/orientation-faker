@@ -16,8 +16,10 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.content.getSystemService
 import net.mm2d.android.orientationfaker.R
 import net.mm2d.orientation.control.Orientation
+import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.view.widget.RemoteViewsCreator
 
@@ -46,7 +48,7 @@ object NotificationHelper {
     }
 
     private fun getNotificationManager(context: Context): NotificationManager? =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+        context.getSystemService()
 
     fun startForeground(service: Service) {
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
@@ -60,8 +62,8 @@ object NotificationHelper {
     }
 
     private fun makeNotification(context: Context): Notification {
+        val orientation = OrientationHelper.getOrientation()
         val settings = Settings.get()
-        val orientation = settings.orientation
         val visibility =
             if (settings.notifySecret) NotificationCompat.VISIBILITY_SECRET
             else NotificationCompat.VISIBILITY_PUBLIC

@@ -11,9 +11,9 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
+import androidx.core.content.getSystemService
 import net.mm2d.orientation.control.Orientation
 import net.mm2d.orientation.control.OrientationHelper
-import net.mm2d.orientation.settings.Settings
 
 /**
  * Implementation of App Widget functionality.
@@ -22,7 +22,7 @@ class WidgetProvider : AppWidgetProvider() {
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         val orientation =
             if (OrientationHelper.isEnabled) {
-                Settings.get().orientation
+                OrientationHelper.getOrientation()
             } else {
                 Orientation.INVALID
             }
@@ -33,7 +33,7 @@ class WidgetProvider : AppWidgetProvider() {
 
     companion object {
         fun start(context: Context) {
-            update(context, Settings.get().orientation)
+            update(context, OrientationHelper.getOrientation())
         }
 
         fun stop(context: Context) {
@@ -41,8 +41,7 @@ class WidgetProvider : AppWidgetProvider() {
         }
 
         private fun update(context: Context, orientation: Int) {
-            val widgetManager: AppWidgetManager =
-                context.getSystemService(Context.APPWIDGET_SERVICE) as AppWidgetManager
+            val widgetManager: AppWidgetManager = context.getSystemService()!!
             widgetManager.getAppWidgetIds(ComponentName(context, WidgetProvider::class.java))?.forEach {
                 updateAppWidget(context, widgetManager, it, orientation)
             }
