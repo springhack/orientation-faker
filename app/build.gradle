@@ -9,7 +9,7 @@ apply plugin: "com.google.firebase.firebase-perf"
 def applicationName = "OrientationFaker"
 def versionMajor = 4
 def versionMinor = 1
-def versionPatch = 1
+def versionPatch = 2
 
 android {
     compileSdkVersion 29
