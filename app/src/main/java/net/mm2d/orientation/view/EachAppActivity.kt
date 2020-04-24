@@ -2,6 +2,7 @@ package net.mm2d.orientation.view
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -22,12 +23,15 @@ import net.mm2d.orientation.control.ForegroundPackageSettings
 import net.mm2d.orientation.control.Orientation
 import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.service.MainService
+import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.util.SystemSettings
 import net.mm2d.orientation.view.dialog.EachAppOrientationDialog
 import net.mm2d.orientation.view.dialog.UsageAppPermissionDialog
 
 class EachAppActivity : AppCompatActivity(), EachAppOrientationDialog.Callback {
-    private var defaultIcon: Drawable? = null
+    private val settings by lazy {
+        Settings.get()
+    }
     private lateinit var adapter: Adapter
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -35,6 +39,7 @@ class EachAppActivity : AppCompatActivity(), EachAppOrientationDialog.Callback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_each_app)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        package_check.setOnClickListener { togglePackageCheck() }
         recycler_view.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
         scope.launch {
             val list = makeAppList()
@@ -56,6 +61,11 @@ class EachAppActivity : AppCompatActivity(), EachAppOrientationDialog.Callback {
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        applyPackageCheck()
     }
 
     override fun onPostResume() {
@@ -80,6 +90,16 @@ class EachAppActivity : AppCompatActivity(), EachAppOrientationDialog.Callback {
         }
     }
 
+    private fun togglePackageCheck() {
+        settings.foregroundPackageCheckEnabled = !settings.foregroundPackageCheckEnabled
+        applyPackageCheck()
+        MainService.update(this)
+    }
+
+    private fun applyPackageCheck() {
+        package_check.isChecked = settings.foregroundPackageCheckEnabled
+    }
+
     private fun makeAppList(): List<AppInfo> {
         val intent = Intent(Intent.ACTION_MAIN).also {
             it.addCategory(Intent.CATEGORY_LAUNCHER)
@@ -92,7 +112,7 @@ class EachAppActivity : AppCompatActivity(), EachAppOrientationDialog.Callback {
             .filter { it.packageName != packageName }
             .map {
                 AppInfo(
-                    it.loadIcon(pm) ?: getDefaultIcon(),
+                    it,
                     it.loadLabel(pm).toString(),
                     it.packageName
                 )
@@ -101,23 +121,22 @@ class EachAppActivity : AppCompatActivity(), EachAppOrientationDialog.Callback {
             .toList()
     }
 
-    private fun getDefaultIcon(): Drawable =
-        defaultIcon ?: AppCompatResources.getDrawable(this, R.drawable.ic_launcher_default)!!.also {
-            defaultIcon = it
-        }
-
     data class AppInfo(
-        val icon: Drawable,
+        val activityInfo: ActivityInfo,
         val label: String,
         val packageName: String
-    )
+    ) {
+        var icon: Drawable? = null
+    }
 
     class Adapter(
-        context: Context,
+        private val context: Context,
         private val list: List<AppInfo>,
         private val listener: (position: Int, packageName: String) -> Unit
     ) : RecyclerView.Adapter<ViewHolder>() {
         private val inflater: LayoutInflater = LayoutInflater.from(context)
+        private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+        private var defaultIcon: Drawable? = null
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
             ViewHolder(inflater.inflate(R.layout.li_each_app, parent, false))
@@ -125,17 +144,29 @@ class EachAppActivity : AppCompatActivity(), EachAppOrientationDialog.Callback {
         override fun getItemCount(): Int = list.size
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val info = list[position]
-            holder.bind(info)
-            holder.itemView.setOnClickListener {
-                listener(position, info.packageName)
-            }
+            bind(holder.itemView, position, list[position])
         }
-    }
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bind(info: AppInfo) {
-            itemView.app_icon.setImageDrawable(info.icon)
+        private fun getDefaultIcon(): Drawable =
+            defaultIcon ?: AppCompatResources.getDrawable(context, R.drawable.ic_launcher_default)!!.also {
+                defaultIcon = it
+            }
+
+        private fun bind(itemView: View, position: Int, info: AppInfo) {
+            itemView.tag = position
+            if (info.icon != null) {
+                itemView.app_icon.setImageDrawable(info.icon)
+            } else {
+                scope.launch {
+                    info.icon = info.activityInfo.loadIcon(context.packageManager)
+                        ?: getDefaultIcon()
+                    withContext(Dispatchers.Main) {
+                        if (itemView.tag == position) {
+                            itemView.app_icon.setImageDrawable(info.icon)
+                        }
+                    }
+                }
+            }
             itemView.app_name.text = info.label
             itemView.app_package.text = info.packageName
             val orientation = ForegroundPackageSettings.get(info.packageName)
@@ -148,8 +179,13 @@ class EachAppActivity : AppCompatActivity(), EachAppOrientationDialog.Callback {
                 itemView.orientation_icon.setImageResource(0)
                 itemView.orientation_name.text = ""
             }
+            itemView.setOnClickListener {
+                listener(position, info.packageName)
+            }
         }
     }
+
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     companion object {
         fun start(context: Context) {
