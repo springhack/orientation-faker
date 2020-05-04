@@ -9,26 +9,29 @@ package net.mm2d.orientation.util
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Lifecycle.State
 import com.google.ads.consent.*
 import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
-import io.reactivex.Single
-import io.reactivex.subjects.SingleSubject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.mm2d.android.orientationfaker.BuildConfig
 import net.mm2d.log.Logger
 import java.net.URL
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
  */
 object AdMob {
-    private const val APP_ID = "ca-app-pub-3057634395460859~4653069539"
     private const val UNIT_ID_SETTINGS = "ca-app-pub-3057634395460859/5509364941"
     private const val UNIT_ID_DETAILED = "ca-app-pub-3057634395460859/9578179809"
     private const val PUBLISHER_ID = "pub-3057634395460859"
@@ -37,9 +40,10 @@ object AdMob {
     private var checked: Boolean = false
     private var isInEeaOrUnknown: Boolean = false
     private var consentStatus: ConsentStatus? = null
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     fun initialize(context: Context) {
-        MobileAds.initialize(context, APP_ID)
+        MobileAds.initialize(context) {}
     }
 
     fun makeSettingsAdView(context: Context): AdView = AdView(context).apply {
@@ -53,13 +57,11 @@ object AdMob {
     }
 
     fun loadAd(activity: FragmentActivity, adView: AdView) {
-        Handler().post {
-            loadAndConfirmConsentState(activity)
-                .subscribe { status ->
-                    if (activity.isResumed()) {
-                        loadAd(adView, status)
-                    }
-                }
+        scope.launch {
+            val state = loadAndConfirmConsentState(activity)
+            withContext(Dispatchers.Main) {
+                loadAd(adView, state)
+            }
         }
     }
 
@@ -87,54 +89,53 @@ object AdMob {
         }
     }
 
-    private fun loadAndConfirmConsentState(activity: FragmentActivity): Single<ConsentStatus> {
-        val subject = SingleSubject.create<ConsentStatus>()
-        if (notifyOrConfirm(activity, subject)) {
-            return subject
-        }
-        val consentInformation = ConsentInformation.getInstance(activity)
-        if (BuildConfig.DEBUG) {
-            consentInformation.debugGeography = DebugGeography.DEBUG_GEOGRAPHY_EEA
-        }
-        consentInformation.requestConsentInfoUpdate(
-            arrayOf(PUBLISHER_ID),
-            object : ConsentInfoUpdateListener {
-                override fun onConsentInfoUpdated(status: ConsentStatus?) {
-                    checked = true
-                    consentStatus = status
-                    isInEeaOrUnknown = consentInformation.isRequestLocationInEeaOrUnknown
-                    notifyOrConfirm(activity, subject)
-                }
+    private suspend fun loadAndConfirmConsentState(activity: FragmentActivity): ConsentStatus =
+        suspendCoroutine { continuation ->
+            if (notifyOrConfirm(activity, continuation)) {
+                return@suspendCoroutine
+            }
+            val consentInformation = ConsentInformation.getInstance(activity)
+            if (BuildConfig.DEBUG) {
+                consentInformation.debugGeography = DebugGeography.DEBUG_GEOGRAPHY_EEA
+            }
+            consentInformation.requestConsentInfoUpdate(
+                arrayOf(PUBLISHER_ID),
+                object : ConsentInfoUpdateListener {
+                    override fun onConsentInfoUpdated(status: ConsentStatus?) {
+                        checked = true
+                        consentStatus = status
+                        isInEeaOrUnknown = consentInformation.isRequestLocationInEeaOrUnknown
+                        notifyOrConfirm(activity, continuation)
+                    }
 
-                override fun onFailedToUpdateConsentInfo(reason: String?) {
-                    subject.onSuccess(ConsentStatus.UNKNOWN)
-                }
-            })
-        return subject
-    }
+                    override fun onFailedToUpdateConsentInfo(reason: String?) {
+                        continuation.resume(ConsentStatus.UNKNOWN)
+                    }
+                })
+        }
 
     private fun notifyOrConfirm(
         activity: FragmentActivity,
-        subject: SingleSubject<ConsentStatus>
+        continuation: Continuation<ConsentStatus>
     ): Boolean {
         if (!checked) {
             return false
         }
         if (!isInEeaOrUnknown) {
-            subject.onSuccess(ConsentStatus.PERSONALIZED)
+            continuation.resume(ConsentStatus.PERSONALIZED)
             return true
         }
         when (val status = consentStatus) {
             ConsentStatus.NON_PERSONALIZED,
             ConsentStatus.PERSONALIZED -> {
-                subject.onSuccess(status)
+                continuation.resume(status)
             }
             ConsentStatus.UNKNOWN,
             null -> {
                 try {
-                    showConsentForm(activity, subject)
+                    showConsentForm(activity, continuation)
                 } catch (e: Throwable) {
-                    subject.onError(e)
+                    continuation.resumeWithException(e)
                 }
             }
         }
@@ -143,16 +144,15 @@ object AdMob {
 
     private fun showConsentForm(
         activity: FragmentActivity,
-        subject: SingleSubject<ConsentStatus>? = null
+        continuation: Continuation<ConsentStatus>? = null
     ) {
-        val privacyUrl = URL(PRIVACY_POLICY_URL)
         var form: ConsentForm? = null
         val listener = object : ConsentFormListener() {
             override fun onConsentFormLoaded() {
-                if (activity.isResumed()) {
+                if (activity.isActive()) {
                     form?.show()
                 } else {
-                    subject?.onSuccess(ConsentStatus.UNKNOWN)
+                    continuation?.resume(ConsentStatus.UNKNOWN)
                 }
             }
 
@@ -160,21 +160,19 @@ object AdMob {
 
             override fun onConsentFormClosed(status: ConsentStatus?, userPrefersAdFree: Boolean?) {
                 consentStatus = status
-                subject?.onSuccess(status ?: ConsentStatus.UNKNOWN)
+                continuation?.resume(status ?: ConsentStatus.UNKNOWN)
             }
 
             override fun onConsentFormError(errorDescription: String?) {
                 Logger.e { "error:$errorDescription" }
-                subject?.onSuccess(ConsentStatus.UNKNOWN)
+                continuation?.resume(ConsentStatus.UNKNOWN)
             }
         }
-        form = ConsentForm.Builder(activity, privacyUrl)
+        form = ConsentForm.Builder(activity, URL(PRIVACY_POLICY_URL))
             .withListener(listener)
             .withPersonalizedAdsOption()
             .withNonPersonalizedAdsOption()
             .build()
         form?.load()
     }
-
-    private fun FragmentActivity.isResumed(): Boolean = lifecycle.currentState == State.RESUMED
 }

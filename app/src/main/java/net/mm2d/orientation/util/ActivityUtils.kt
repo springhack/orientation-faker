@@ -5,3 +5,6 @@ import androidx.lifecycle.Lifecycle.State
 
 fun ComponentActivity.isStarted(): Boolean =
     lifecycle.currentState.isAtLeast(State.STARTED)
+
+fun ComponentActivity.isActive(): Boolean =
+    !isFinishing && lifecycle.currentState.isAtLeast(State.STARTED)
