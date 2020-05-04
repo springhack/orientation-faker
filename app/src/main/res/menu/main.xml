@@ -30,7 +30,7 @@
     <item
         android:id="@+id/relevant_ads"
         android:orderInCategory="101"
-        android:title="@string/relevant_ads"
+        android:title="@string/options_menu_relevant_ads"
         app:showAsAction="never"
         />
 </menu>
