@@ -9,7 +9,7 @@ package net.mm2d.orientation.util
 
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
+import androidx.activity.ComponentActivity
 import com.google.ads.consent.*
 import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.AdRequest
@@ -19,7 +19,6 @@ import com.google.android.gms.ads.MobileAds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.mm2d.android.orientationfaker.BuildConfig
 import net.mm2d.log.Logger
 import java.net.URL
@@ -56,7 +55,7 @@ object AdMob {
         adUnitId = UNIT_ID_DETAILED
     }
 
-    fun loadAd(activity: FragmentActivity, adView: AdView) {
+    fun loadAd(activity: ComponentActivity, adView: AdView) {
         scope.launch {
             loadAd(adView, loadAndConfirmConsentState(activity))
         }
@@ -64,7 +63,7 @@ object AdMob {
 
     fun isInEeaOrUnknown(): Boolean = checked && isInEeaOrUnknown
 
-    fun updateConsent(activity: FragmentActivity) {
+    fun updateConsent(activity: ComponentActivity) {
         showConsentForm(activity)
     }
 
@@ -86,7 +85,7 @@ object AdMob {
         }
     }
 
-    private suspend fun loadAndConfirmConsentState(activity: FragmentActivity): ConsentStatus =
+    private suspend fun loadAndConfirmConsentState(activity: ComponentActivity): ConsentStatus =
         suspendCoroutine { continuation ->
             if (notifyOrConfirm(activity, continuation)) {
                 return@suspendCoroutine
@@ -112,7 +111,7 @@ object AdMob {
         }
 
     private fun notifyOrConfirm(
-        activity: FragmentActivity,
+        activity: ComponentActivity,
         continuation: Continuation<ConsentStatus>
     ): Boolean {
         if (!checked) {
@@ -140,7 +139,7 @@ object AdMob {
     }
 
     private fun showConsentForm(
-        activity: FragmentActivity,
+        activity: ComponentActivity,
         continuation: Continuation<ConsentStatus>? = null
     ) {
         var form: ConsentForm? = null
