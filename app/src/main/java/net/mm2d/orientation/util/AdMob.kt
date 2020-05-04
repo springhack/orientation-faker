@@ -40,7 +40,7 @@ object AdMob {
     private var checked: Boolean = false
     private var isInEeaOrUnknown: Boolean = false
     private var consentStatus: ConsentStatus? = null
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main)
 
     fun initialize(context: Context) {
         MobileAds.initialize(context) {}
@@ -58,10 +58,7 @@ object AdMob {
 
     fun loadAd(activity: FragmentActivity, adView: AdView) {
         scope.launch {
-            val state = loadAndConfirmConsentState(activity)
-            withContext(Dispatchers.Main) {
-                loadAd(adView, state)
-            }
+            loadAd(adView, loadAndConfirmConsentState(activity))
         }
     }
 
