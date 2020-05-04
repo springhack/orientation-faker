@@ -84,9 +84,9 @@ dependencies {
     debugImplementation "com.squareup.leakcanary:leakcanary-android:2.2"
 
     implementation "com.crashlytics.sdk.android:crashlytics:2.10.1"
-    implementation "com.google.firebase:firebase-core:17.3.0"
-    implementation "com.google.firebase:firebase-ads:19.0.1"
-    implementation "com.google.firebase:firebase-perf:19.0.5"
+    implementation "com.google.firebase:firebase-core:17.4.0"
+    implementation "com.google.firebase:firebase-ads:19.1.0"
+    implementation "com.google.firebase:firebase-perf:19.0.7"
     implementation "com.google.android.ads.consent:consent-library:1.0.8"
 }
 
