@@ -250,6 +250,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
         orientationList.addAll(Default.orientationList)
         applyLayoutSelection()
         updateLayoutSelector()
+        updateCaution()
     }
 
     private fun applyLayoutSelection() {
