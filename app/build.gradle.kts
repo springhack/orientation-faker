@@ -90,11 +90,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.8")
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.4")
 
-    implementation("com.google.firebase:firebase-core:17.4.3")
-    implementation("com.google.firebase:firebase-ads:19.2.0")
-    implementation("com.google.firebase:firebase-perf:19.0.7")
-    implementation("com.google.firebase:firebase-crashlytics:17.1.0")
-    implementation("com.google.firebase:firebase-analytics:17.4.3")
+    implementation("com.google.firebase:firebase-core:17.4.4")
+    implementation("com.google.firebase:firebase-ads:19.3.0")
+    implementation("com.google.firebase:firebase-perf:19.0.8")
+    implementation("com.google.firebase:firebase-crashlytics:17.1.1")
+    implementation("com.google.firebase:firebase-analytics:17.4.4")
     implementation("com.google.android.ads.consent:consent-library:1.0.8")
 }
 
