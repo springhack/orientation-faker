@@ -14,7 +14,7 @@ plugins {
 val applicationName = "OrientationFaker"
 val versionMajor = 4
 val versionMinor = 2
-val versionPatch = 9
+val versionPatch = 10
 
 android {
     compileSdkVersion(29)
@@ -69,7 +69,7 @@ dependencies {
     implementation("androidx.browser:browser:1.2.0")
     implementation("androidx.legacy:legacy-support-v13:1.0.0")
     implementation("androidx.lifecycle:lifecycle-process:2.2.0")
-    implementation("androidx.constraintlayout:constraintlayout:1.1.3")
+    implementation("androidx.constraintlayout:constraintlayout:2.0.0")
     implementation("androidx.gridlayout:gridlayout:1.0.0")
     implementation("androidx.preference:preference:1.1.1")
     implementation("com.google.android.material:material:1.2.0")
