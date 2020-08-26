@@ -19,6 +19,7 @@ import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.service.KeepAlive
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.tabs.CustomTabsHelper
+import net.mm2d.orientation.view.notification.NotificationHelper
 import net.mm2d.orientation.util.AdMob
 
 /**
@@ -31,6 +32,7 @@ class App : Application() {
         setUpLogger()
         setStrictMode()
         Settings.initialize(this)
+        NotificationHelper.createChannel(this)
         ForegroundPackageSettings.initialize(this)
         CustomTabsHelper.initialize(this)
         OrientationHelper.initialize(this)
