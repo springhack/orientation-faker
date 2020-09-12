@@ -134,13 +134,13 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         relevantAds.isVisible = AdMob.isInEeaOrUnknown()
         return super.onPrepareOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
             R.id.license -> LicenseActivity.start(this)
             R.id.source_code -> LaunchUtils.openSourceCode(this)
             R.id.privacy_policy -> LaunchUtils.openPrivacyPolicy(this)

@@ -13,16 +13,16 @@ plugins {
 
 val applicationName = "OrientationFaker"
 val versionMajor = 4
-val versionMinor = 3
+val versionMinor = 4
 val versionPatch = 0
 
 android {
-    compileSdkVersion(29)
+    compileSdkVersion(30)
 
     defaultConfig {
         applicationId = "net.mm2d.android.orientationfaker"
         minSdkVersion(21)
-        targetSdkVersion(29)
+        targetSdkVersion(30)
         versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
         vectorDrawables.useSupportLibrary = true
@@ -69,10 +69,10 @@ dependencies {
     implementation("androidx.browser:browser:1.2.0")
     implementation("androidx.legacy:legacy-support-v13:1.0.0")
     implementation("androidx.lifecycle:lifecycle-process:2.2.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.0.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.0.1")
     implementation("androidx.gridlayout:gridlayout:1.0.0")
     implementation("androidx.preference:preference:1.1.1")
-    implementation("com.google.android.material:material:1.2.0")
+    implementation("com.google.android.material:material:1.2.1")
     implementation("com.google.android.play:core:1.8.0")
     implementation("com.google.android.play:core-ktx:1.8.1")
     implementation("androidx.room:room-runtime:2.2.5")
@@ -80,7 +80,7 @@ dependencies {
     kapt("androidx.room:room-compiler:2.2.5")
     implementation("net.mm2d:log:0.9.2")
     implementation("net.mm2d:log-android:0.9.2")
-    implementation("net.mm2d:color-chooser:0.1.8")
+    implementation("net.mm2d:color-chooser:0.2.0")
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
