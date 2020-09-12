@@ -87,7 +87,7 @@ dependencies {
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.4")
 
     implementation("com.google.firebase:firebase-core:17.5.0")
-    implementation("com.google.firebase:firebase-ads:19.3.0")
+    implementation("com.google.firebase:firebase-ads:19.4.0")
     implementation("com.google.firebase:firebase-perf:19.0.8")
     implementation("com.google.firebase:firebase-crashlytics:17.2.1")
     implementation("com.google.firebase:firebase-analytics:17.5.0")
