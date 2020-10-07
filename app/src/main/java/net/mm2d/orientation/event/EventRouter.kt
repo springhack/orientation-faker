@@ -8,43 +8,28 @@
 package net.mm2d.orientation.event
 
 import androidx.lifecycle.LifecycleOwner
-import kotlinx.coroutines.*
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
-import net.mm2d.orientation.event.Event.EVENT_UPDATE
+import kotlinx.coroutines.launch
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
  */
-@FlowPreview
-@ExperimentalCoroutinesApi
 object EventRouter {
-    private val channel: BroadcastChannel<Event> = BroadcastChannel(1)
+    private val updateChannel: BroadcastChannel<Unit> = BroadcastChannel(1)
 
     fun notifyUpdate() {
         GlobalScope.launch {
-            channel.send(EVENT_UPDATE)
+            updateChannel.send(Unit)
         }
     }
 
-    fun createUpdateObserver(): EventObserver =
-        ChannelEventObserver(EVENT_UPDATE)
-
-    internal class ChannelEventObserver(
-        private val event: Event
-    ) : EventObserver {
-        override fun subscribe(owner: LifecycleOwner, callback: () -> Unit) {
-            GlobalScope.launch {
-                channel.asFlow()
-                    .filter { it == event }
-                    .collect {
-                        withContext(Dispatchers.Main) {
-                            callback.invoke()
-                        }
-                    }
-            }.cancelOnDestroy(owner)
+    fun observeUpdate(owner: LifecycleOwner, callback: () -> Unit) {
+        owner.lifecycleScope.launch {
+            updateChannel.asFlow().collect { callback() }
         }
     }
 }

@@ -26,7 +26,7 @@ import net.mm2d.color.chooser.ColorChooserDialog
 import net.mm2d.orientation.control.Orientation
 import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.event.EventRouter
-import net.mm2d.orientation.service.MainService
+import net.mm2d.orientation.service.MainController
 import net.mm2d.orientation.settings.Default
 import net.mm2d.orientation.settings.OrientationList
 import net.mm2d.orientation.settings.Settings
@@ -55,7 +55,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
         setContentView(R.layout.activity_detailed_settings)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setUpViews()
-        EventRouter.createUpdateObserver().subscribe(this) { notificationSample.update() }
+        EventRouter.observeUpdate(this) { notificationSample.update() }
         setUpAdView()
     }
 
@@ -68,7 +68,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
         super.onDestroy()
         if (!orientationList.contains(settings.orientation)) {
             settings.orientation = orientationList[0]
-            MainService.update(this)
+            MainController.update()
             if (!OrientationHelper.isEnabled) {
                 EventRouter.notifyUpdate()
             }
@@ -140,7 +140,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
     private fun updateOrientation(orientation: Int) {
         settings.orientation = orientation
         notificationSample.update()
-        MainService.update(this)
+        MainController.update()
     }
 
     override fun onColorChooserResult(requestCode: Int, resultCode: Int, color: Int) {
@@ -164,7 +164,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
             }
         }
         notificationSample.update()
-        MainService.update(this)
+        MainController.update()
     }
 
     override fun resetTheme() {
@@ -174,7 +174,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
         sample_foreground_selected.setColorFilter(settings.foregroundColorSelected)
         sample_background_selected.setColorFilter(settings.backgroundColorSelected)
         notificationSample.update()
-        MainService.update(this)
+        MainController.update()
     }
 
     private fun setUpLayoutSelector() {
@@ -239,7 +239,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
     private fun updateLayoutSelector() {
         settings.orientationList = orientationList
         notificationSample.update()
-        MainService.update(this)
+        MainController.update()
     }
 
     override fun resetLayout() {
@@ -267,7 +267,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
     private fun toggleUseBlankIcon() {
         settings.shouldUseBlankIconForNotification = !settings.shouldUseBlankIconForNotification
         applyUseBlankIcon()
-        MainService.update(this)
+        MainController.update()
     }
 
     private fun setUpAutoRotateWarning() {
@@ -294,7 +294,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
     private fun toggleNotificationPrivacy() {
         settings.notifySecret = !settings.notifySecret
         applyNotificationPrivacy()
-        MainService.update(this)
+        MainController.update()
     }
 
     private fun setUpSystemSetting() {

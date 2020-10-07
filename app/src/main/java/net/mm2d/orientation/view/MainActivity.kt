@@ -32,7 +32,7 @@ import net.mm2d.android.orientationfaker.R
 import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.event.EventRouter
 import net.mm2d.orientation.review.ReviewRequest
-import net.mm2d.orientation.service.MainService
+import net.mm2d.orientation.service.MainController
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.util.AdMob
 import net.mm2d.orientation.util.LaunchUtils
@@ -57,15 +57,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         supportActionBar?.title = getString(R.string.app_name)
         setUpViews()
-        EventRouter.createUpdateObserver().subscribe(this) {
+        EventRouter.observeUpdate(this) {
             applyStatus()
             notificationSample.update()
         }
         if (!SystemSettings.canDrawOverlays(this)) {
-            MainService.stop(this)
+            MainController.stop()
         } else {
             if (Settings.get().shouldAutoStart()) {
-                MainService.start(this)
+                MainController.start()
             }
             checkUpdate()
         }
@@ -92,7 +92,6 @@ class MainActivity : AppCompatActivity() {
         handler.removeCallbacks(checkSystemSettingsTask)
         handler.post(checkSystemSettingsTask)
         applyStatus()
-        applyAutoStart()
     }
 
     override fun onPause() {
@@ -153,7 +152,6 @@ class MainActivity : AppCompatActivity() {
     private fun setUpViews() {
         notificationSample = NotificationSample(this)
         status.setOnClickListener { toggleStatus() }
-        auto_start.setOnClickListener { toggleAutoStart() }
         detailed_setting.setOnClickListener { DetailedSettingsActivity.start(this) }
         version_description.text = makeVersionInfo()
         setUpOrientationIcons()
@@ -169,14 +167,12 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("NewApi")
     private fun toggleStatus() {
         if (OrientationHelper.isEnabled) {
-            MainService.stop(this)
-            if (settings.shouldAutoStart()) {
-                settings.setAutoStart(false)
-                applyAutoStart()
-            }
+            MainController.stop()
+            settings.setAutoStart(false)
         } else {
             if (SystemSettings.canDrawOverlays(this)) {
-                MainService.start(this)
+                MainController.start()
+                settings.setAutoStart(true)
             } else {
                 OverlayPermissionDialog.showDialog(this)
             }
@@ -196,22 +192,10 @@ class MainActivity : AppCompatActivity() {
         ReviewRequest.requestReviewIfNeed(this)
     }
 
-    private fun toggleAutoStart() {
-        settings.setAutoStart(!settings.shouldAutoStart())
-        applyAutoStart()
-        if (settings.shouldAutoStart() && !OrientationHelper.isEnabled) {
-            MainService.start(this)
-        }
-    }
-
-    private fun applyAutoStart() {
-        auto_start.isChecked = settings.shouldAutoStart()
-    }
-
     private fun updateOrientation(orientation: Int) {
         settings.orientation = orientation
         notificationSample.update()
-        MainService.update(this)
+        MainController.update()
     }
 
     private fun makeVersionInfo(): String {
