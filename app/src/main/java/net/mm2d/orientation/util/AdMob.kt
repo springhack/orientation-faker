@@ -10,6 +10,7 @@ package net.mm2d.orientation.util
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle.State
 import com.google.ads.consent.*
 import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.AdRequest
@@ -137,6 +138,9 @@ object AdMob {
         }
         return true
     }
+
+    fun ComponentActivity.isActive(): Boolean =
+        !isFinishing && lifecycle.currentState.isAtLeast(State.STARTED)
 
     private fun showConsentForm(
         activity: ComponentActivity,
