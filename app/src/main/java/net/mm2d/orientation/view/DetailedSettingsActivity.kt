@@ -19,9 +19,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.gridlayout.widget.GridLayout
 import androidx.gridlayout.widget.GridLayout.spec
 import com.google.android.gms.ads.AdView
-import kotlinx.android.synthetic.main.activity_detailed_settings.*
-import kotlinx.android.synthetic.main.layout_detailed_settings.*
 import net.mm2d.android.orientationfaker.R
+import net.mm2d.android.orientationfaker.databinding.ActivityDetailedSettingsBinding
 import net.mm2d.color.chooser.ColorChooserDialog
 import net.mm2d.orientation.control.Orientation
 import net.mm2d.orientation.control.OrientationHelper
@@ -49,10 +48,12 @@ class DetailedSettingsActivity : AppCompatActivity(),
     private lateinit var orientationListStart: List<Int>
     private val orientationList: MutableList<Int> = mutableListOf()
     private lateinit var adView: AdView
+    private lateinit var binding: ActivityDetailedSettingsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detailed_settings)
+        binding = ActivityDetailedSettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setUpViews()
         EventRouter.observeUpdate(this) { notificationSample.update() }
@@ -61,7 +62,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
 
     private fun setUpAdView() {
         adView = AdMob.makeDetailedAdView(this)
-        container.addView(adView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        binding.container.addView(adView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
     }
 
     override fun onDestroy() {
@@ -86,6 +87,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
         super.onResume()
         notificationSample.update()
         applyLayoutSelection()
+        applyUseRoundBackground()
         applyUseBlankIcon()
         applyAutoRotateWarning()
         applyNotificationPrivacy()
@@ -104,6 +106,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
         notificationSample = NotificationSample(this)
         setUpSample()
         setUpLayoutSelector()
+        setUpUseRoundBackground()
         setUpUseBlankIcon()
         setUpAutoRotateWarning()
         setUpNotificationPrivacy()
@@ -111,23 +114,23 @@ class DetailedSettingsActivity : AppCompatActivity(),
     }
 
     private fun setUpSample() {
-        sample_foreground.setColorFilter(settings.foregroundColor)
-        sample_background.setColorFilter(settings.backgroundColor)
-        sample_foreground_selected.setColorFilter(settings.foregroundColorSelected)
-        sample_background_selected.setColorFilter(settings.backgroundColorSelected)
-        foreground.setOnClickListener {
+        binding.content.sampleForeground.setColorFilter(settings.foregroundColor)
+        binding.content.sampleBackground.setColorFilter(settings.backgroundColor)
+        binding.content.sampleForegroundSelected.setColorFilter(settings.foregroundColorSelected)
+        binding.content.sampleBackgroundSelected.setColorFilter(settings.backgroundColorSelected)
+        binding.content.foreground.setOnClickListener {
             ColorChooserDialog.show(this, it.id, settings.foregroundColor)
         }
-        background.setOnClickListener {
+        binding.content.background.setOnClickListener {
             ColorChooserDialog.show(this, it.id, settings.backgroundColor)
         }
-        foreground_selected.setOnClickListener {
+        binding.content.foregroundSelected.setOnClickListener {
             ColorChooserDialog.show(this, it.id, settings.foregroundColorSelected)
         }
-        background_selected.setOnClickListener {
+        binding.content.backgroundSelected.setOnClickListener {
             ColorChooserDialog.show(this, it.id, settings.backgroundColorSelected)
         }
-        reset_theme.setOnClickListener { ResetThemeDialog.show(this) }
+        binding.content.resetTheme.setOnClickListener { ResetThemeDialog.show(this) }
         setUpOrientationIcons()
     }
 
@@ -148,19 +151,19 @@ class DetailedSettingsActivity : AppCompatActivity(),
         when (requestCode) {
             R.id.foreground -> {
                 settings.foregroundColor = color
-                sample_foreground.setColorFilter(color)
+                binding.content.sampleForeground.setColorFilter(color)
             }
             R.id.background -> {
                 settings.backgroundColor = color
-                sample_background.setColorFilter(color)
+                binding.content.sampleBackground.setColorFilter(color)
             }
             R.id.foreground_selected -> {
                 settings.foregroundColorSelected = color
-                sample_foreground_selected.setColorFilter(color)
+                binding.content.sampleForegroundSelected.setColorFilter(color)
             }
             R.id.background_selected -> {
                 settings.backgroundColorSelected = color
-                sample_background_selected.setColorFilter(color)
+                binding.content.sampleBackgroundSelected.setColorFilter(color)
             }
         }
         notificationSample.update()
@@ -169,10 +172,10 @@ class DetailedSettingsActivity : AppCompatActivity(),
 
     override fun resetTheme() {
         settings.resetTheme()
-        sample_foreground.setColorFilter(settings.foregroundColor)
-        sample_background.setColorFilter(settings.backgroundColor)
-        sample_foreground_selected.setColorFilter(settings.foregroundColorSelected)
-        sample_background_selected.setColorFilter(settings.backgroundColorSelected)
+        binding.content.sampleForeground.setColorFilter(settings.foregroundColor)
+        binding.content.sampleBackground.setColorFilter(settings.backgroundColor)
+        binding.content.sampleForegroundSelected.setColorFilter(settings.foregroundColorSelected)
+        binding.content.sampleBackgroundSelected.setColorFilter(settings.backgroundColorSelected)
         notificationSample.update()
         MainController.update()
     }
@@ -200,19 +203,19 @@ class DetailedSettingsActivity : AppCompatActivity(),
                 it.width = 0
                 it.height = resources.getDimensionPixelSize(R.dimen.customize_height)
             }
-            check_holder.addView(view, params)
+            binding.content.checkHolder.addView(view, params)
         }
         applyLayoutSelection()
-        reset_layout.setOnClickListener { ResetLayoutDialog.show(this) }
-        help_layout.setOnClickListener { OrientationHelpDialog.show(this) }
+        binding.content.resetLayout.setOnClickListener { ResetLayoutDialog.show(this) }
+        binding.content.helpLayout.setOnClickListener { OrientationHelpDialog.show(this) }
         updateCaution()
     }
 
     private fun updateCaution() {
         if (orientationList.any { Orientation.experimental.contains(it) }) {
-            caution.visibility = View.VISIBLE
+            binding.content.caution.visibility = View.VISIBLE
         } else {
-            caution.visibility = View.GONE
+            binding.content.caution.visibility = View.GONE
         }
     }
 
@@ -256,12 +259,29 @@ class DetailedSettingsActivity : AppCompatActivity(),
         }
     }
 
+    private fun setUpUseRoundBackground() {
+        binding.content.useRoundBackground.setOnClickListener {
+            toggleUseRoundBackground()
+        }
+    }
+
+    private fun applyUseRoundBackground() {
+        binding.content.useRoundBackground.isChecked = settings.shouldUseRoundBackground
+    }
+
+    private fun toggleUseRoundBackground() {
+        settings.shouldUseRoundBackground = !settings.shouldUseRoundBackground
+        applyUseRoundBackground()
+        MainController.update()
+        notificationSample.update()
+    }
+
     private fun setUpUseBlankIcon() {
-        use_blank_icon_for_notification.setOnClickListener { toggleUseBlankIcon() }
+        binding.content.useBlankIconForNotification.setOnClickListener { toggleUseBlankIcon() }
     }
 
     private fun applyUseBlankIcon() {
-        use_blank_icon_for_notification.isChecked = settings.shouldUseBlankIconForNotification
+        binding.content.useBlankIconForNotification.isChecked = settings.shouldUseBlankIconForNotification
     }
 
     private fun toggleUseBlankIcon() {
@@ -271,11 +291,11 @@ class DetailedSettingsActivity : AppCompatActivity(),
     }
 
     private fun setUpAutoRotateWarning() {
-        auto_rotate_warning.setOnClickListener { toggleAutoRotateWarning() }
+        binding.content.autoRotateWarning.setOnClickListener { toggleAutoRotateWarning() }
     }
 
     private fun applyAutoRotateWarning() {
-        auto_rotate_warning.isChecked = settings.autoRotateWarning
+        binding.content.autoRotateWarning.isChecked = settings.autoRotateWarning
     }
 
     private fun toggleAutoRotateWarning() {
@@ -284,11 +304,11 @@ class DetailedSettingsActivity : AppCompatActivity(),
     }
 
     private fun setUpNotificationPrivacy() {
-        notification_privacy.setOnClickListener { toggleNotificationPrivacy() }
+        binding.content.notificationPrivacy.setOnClickListener { toggleNotificationPrivacy() }
     }
 
     private fun applyNotificationPrivacy() {
-        notification_privacy.isChecked = settings.notifySecret
+        binding.content.notificationPrivacy.isChecked = settings.notifySecret
     }
 
     private fun toggleNotificationPrivacy() {
@@ -298,10 +318,10 @@ class DetailedSettingsActivity : AppCompatActivity(),
     }
 
     private fun setUpSystemSetting() {
-        system_app.setOnClickListener {
+        binding.content.systemApp.setOnClickListener {
             SystemSettings.startApplicationDetailsSettings(this)
         }
-        system_notification.setOnClickListener {
+        binding.content.systemNotification.setOnClickListener {
             SystemSettings.startAppNotificationSettings(this)
         }
     }

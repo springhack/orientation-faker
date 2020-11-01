@@ -11,7 +11,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 import net.mm2d.android.orientationfaker.R
 import net.mm2d.orientation.util.SystemSettings
-import net.mm2d.orientation.util.isInActive
 
 class OverlayPermissionDialog : DialogFragment() {
     @RequiresApi(Build.VERSION_CODES.M)
@@ -44,11 +43,9 @@ class OverlayPermissionDialog : DialogFragment() {
         private const val TAG = "OverlayPermissionDialog"
 
         @RequiresApi(Build.VERSION_CODES.M)
-        fun showDialog(activity: FragmentActivity) {
-            if (activity.isInActive()) return
+        fun show(activity: FragmentActivity) {
             val manager = activity.supportFragmentManager
-            if (manager.isStateSaved) return
-            if (manager.findFragmentByTag(TAG) != null) return
+            if (manager.isStateSaved || manager.findFragmentByTag(TAG) != null) return
             OverlayPermissionDialog().show(manager, TAG)
         }
     }

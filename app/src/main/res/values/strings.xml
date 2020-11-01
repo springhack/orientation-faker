@@ -41,13 +41,16 @@
     <string name="menu_title_detailed_settings">Detailed Settings</string>
     <string name="menu_description_detailed_settings_description">Theme and detailed behavior settings of notification</string>
     <string name="menu_title_setting_for_each_app">Setting for each app</string>
-    <string name="menu_description_setting_for_each_app_description">Set the default screen orientation for each app</string>
+    <string name="menu_description_setting_for_each_app">Set the default screen orientation for each app</string>
+    <string name="menu_title_app_theme">App theme</string>
+    <string name="menu_description_app_theme_system">Follow system</string>
+    <string name="menu_description_app_theme_light">Light</string>
+    <string name="menu_description_app_theme_dark">Dark</string>
     <string name="menu_title_version">Version</string>
     <string name="caution_auto_rotate">Please change the system setting to auto-rotate. Reverse setting may not be possible</string>
     <string name="caution_experimental_orientation">\"sensor port\", \"sensor land\", \"lie left\", \"lie right\" and \"headstand\" are experimental features. Some problems may occur</string>
 
     <string name="package_check_disabled">Please turn on the switch to enable this function</string>
-    <string name="caution_experimental_feature">This is experimental feature. If you have any problems please report details to developer</string>
     <string name="search_apps">Search apps</string>
     <string name="no_app_caution">No apps that match the search conditions</string>
 
@@ -57,6 +60,9 @@
     <string name="button_background_color">background</string>
     <string name="button_selected_foreground_color">*foreground</string>
     <string name="button_selected_background_color">*background</string>
+    <string name="menu_title_use_round_background">Round icon background</string>
+    <string name="menu_description_use_round_background_on">Show only icon without descriptive text, with round icon background</string>
+    <string name="menu_description_use_round_background_off">Show icon and descriptive text, with rectangular background</string>
     <string name="menu_title_use_blank_icon_for_notification">Make the status bar icon transparent</string>
     <string name="menu_description_use_blank_icon_for_notification_on">Display transparent icon in the status bar</string>
     <string name="menu_description_use_blank_icon_for_notification_off">Display icon that reflects the status in the status bar</string>

@@ -7,40 +7,47 @@
 
 package net.mm2d.orientation.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_license.*
-import net.mm2d.android.orientationfaker.R
-import net.mm2d.orientation.util.LaunchUtils
+import net.mm2d.android.orientationfaker.databinding.ActivityLicenseBinding
+import net.mm2d.orientation.util.Launcher
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
  */
 class LicenseActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityLicenseBinding
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_license)
-        setSupportActionBar(toolbar)
+        binding = ActivityLicenseBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        webView.settings.setSupportZoom(false)
-        webView.settings.displayZoomControls = false
-        webView.webViewClient = object : WebViewClient() {
+        binding.webView.settings.setSupportZoom(false)
+        binding.webView.settings.displayZoomControls = false
+        binding.webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
                 request: WebResourceRequest?
             ): Boolean {
                 val uri = request?.url ?: return true
-                return LaunchUtils.openCustomTabs(this@LicenseActivity, uri)
+                return Launcher.openCustomTabs(this@LicenseActivity, uri)
             }
         }
-        webView.loadUrl("file:///android_asset/license.html")
+        val nightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val query = if (nightMode == Configuration.UI_MODE_NIGHT_YES) "t=dark" else "t=light"
+        binding.webView.settings.javaScriptEnabled = true
+        binding.webView.loadUrl("file:///android_asset/license.html?$query")
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

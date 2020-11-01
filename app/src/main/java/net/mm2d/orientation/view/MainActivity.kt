@@ -17,6 +17,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout.LayoutParams
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.Lifecycle.State
 import com.google.android.gms.ads.AdView
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -25,24 +26,25 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.ktx.clientVersionStalenessDays
 import com.google.android.play.core.ktx.isImmediateUpdateAllowed
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.layout_main.*
 import net.mm2d.android.orientationfaker.BuildConfig
 import net.mm2d.android.orientationfaker.R
+import net.mm2d.android.orientationfaker.databinding.ActivityMainBinding
 import net.mm2d.orientation.control.OrientationHelper
 import net.mm2d.orientation.event.EventRouter
 import net.mm2d.orientation.review.ReviewRequest
 import net.mm2d.orientation.service.MainController
+import net.mm2d.orientation.settings.NightModes
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.util.AdMob
-import net.mm2d.orientation.util.LaunchUtils
+import net.mm2d.orientation.util.Launcher
 import net.mm2d.orientation.util.SystemSettings
+import net.mm2d.orientation.view.dialog.NightModeDialog
 import net.mm2d.orientation.view.dialog.OverlayPermissionDialog
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), NightModeDialog.Callback {
     private val settings by lazy {
         Settings.get()
     }
@@ -51,10 +53,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var notificationSample: NotificationSample
     private lateinit var adView: AdView
     private lateinit var relevantAds: MenuItem
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         supportActionBar?.title = getString(R.string.app_name)
         setUpViews()
         EventRouter.observeUpdate(this) {
@@ -74,14 +78,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpAdView() {
         adView = AdMob.makeSettingsAdView(this)
-        container.addView(adView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        binding.container.addView(adView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
     }
 
     @SuppressLint("NewApi")
     override fun onPostResume() {
         super.onPostResume()
         if (!SystemSettings.canDrawOverlays(this)) {
-            OverlayPermissionDialog.showDialog(this)
+            OverlayPermissionDialog.show(this)
         }
     }
 
@@ -120,10 +124,11 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (!settings.autoRotateWarning) {
-            caution.visibility = View.GONE
+            binding.content.caution.visibility = View.GONE
             return
         }
-        caution.visibility = if (SystemSettings.rotationIsFixed(this)) View.VISIBLE else View.GONE
+        binding.content.caution.visibility =
+            if (SystemSettings.rotationIsFixed(this)) View.VISIBLE else View.GONE
         handler.postDelayed(checkSystemSettingsTask, CHECK_INTERVAL)
     }
 
@@ -141,9 +146,9 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.license -> LicenseActivity.start(this)
-            R.id.source_code -> LaunchUtils.openSourceCode(this)
-            R.id.privacy_policy -> LaunchUtils.openPrivacyPolicy(this)
-            R.id.play_store -> LaunchUtils.openGooglePlay(this)
+            R.id.source_code -> Launcher.openSourceCode(this)
+            R.id.privacy_policy -> Launcher.openPrivacyPolicy(this)
+            R.id.play_store -> Launcher.openGooglePlay(this)
             R.id.relevant_ads -> AdMob.updateConsent(this)
         }
         return true
@@ -151,17 +156,36 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpViews() {
         notificationSample = NotificationSample(this)
-        status.setOnClickListener { toggleStatus() }
-        detailed_setting.setOnClickListener { DetailedSettingsActivity.start(this) }
-        version_description.text = makeVersionInfo()
+        binding.content.status.setOnClickListener { toggleStatus() }
+        binding.content.detailedSetting.setOnClickListener { DetailedSettingsActivity.start(this) }
+        binding.content.versionDescription.text = makeVersionInfo()
         setUpOrientationIcons()
-        each_app.setOnClickListener { EachAppActivity.start(this) }
+        binding.content.eachApp.setOnClickListener { EachAppActivity.start(this) }
+        setUpNightMode()
     }
 
     private fun setUpOrientationIcons() {
         notificationSample.buttonList.forEach { view ->
             view.button.setOnClickListener { updateOrientation(view.orientation) }
         }
+    }
+
+    private fun setUpNightMode() {
+        binding.content.nightMode.setOnClickListener {
+            NightModeDialog.show(this)
+        }
+        applyNightMode()
+    }
+
+    private fun applyNightMode() {
+        binding.content.nightModeDescription.setText(NightModes.getTextId(settings.nightMode))
+    }
+
+    override fun onSelectNightMode(mode: Int) {
+        if (settings.nightMode == mode) return
+        settings.nightMode = mode
+        applyNightMode()
+        AppCompatDelegate.setDefaultNightMode(mode)
     }
 
     @SuppressLint("NewApi")
@@ -174,20 +198,20 @@ class MainActivity : AppCompatActivity() {
                 MainController.start()
                 settings.setAutoStart(true)
             } else {
-                OverlayPermissionDialog.showDialog(this)
+                OverlayPermissionDialog.show(this)
             }
         }
     }
 
     private fun applyStatus() {
         if (OrientationHelper.isEnabled) {
-            status_button.setText(R.string.button_status_stop)
-            status_button.setBackgroundResource(R.drawable.bg_stop_button)
-            status_description.setText(R.string.menu_description_status_running)
+            binding.content.statusButton.setText(R.string.button_status_stop)
+            binding.content.statusButton.setBackgroundResource(R.drawable.bg_stop_button)
+            binding.content.statusDescription.setText(R.string.menu_description_status_running)
         } else {
-            status_button.setText(R.string.button_status_start)
-            status_button.setBackgroundResource(R.drawable.bg_start_button)
-            status_description.setText(R.string.menu_description_status_waiting)
+            binding.content.statusButton.setText(R.string.button_status_start)
+            binding.content.statusButton.setBackgroundResource(R.drawable.bg_start_button)
+            binding.content.statusDescription.setText(R.string.menu_description_status_waiting)
         }
         ReviewRequest.requestReviewIfNeed(this)
     }

@@ -4,7 +4,6 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-android-extensions")
     id("kotlin-kapt")
     id("com.github.ben-manes.versions")
     id("com.google.firebase.crashlytics")
@@ -13,7 +12,7 @@ plugins {
 
 val applicationName = "OrientationFaker"
 val versionMajor = 4
-val versionMinor = 5
+val versionMinor = 6
 val versionPatch = 0
 
 android {
@@ -54,6 +53,9 @@ android {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
     }
+    buildFeatures {
+        viewBinding = true
+    }
     applicationVariants.all {
         if (buildType.name == "release") {
             outputs.all {
@@ -65,8 +67,8 @@ android {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.0")
     implementation("androidx.appcompat:appcompat:1.2.0")
     implementation("androidx.core:core-ktx:1.3.2")
     implementation("androidx.browser:browser:1.2.0")
@@ -74,11 +76,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-process:2.2.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.0.2")
+    implementation("androidx.constraintlayout:constraintlayout:2.0.4")
     implementation("androidx.gridlayout:gridlayout:1.0.0")
-    implementation("androidx.preference:preference:1.1.1")
+    implementation("androidx.preference:preference-ktx:1.1.1")
     implementation("com.google.android.material:material:1.2.1")
-    implementation("com.google.android.play:core:1.8.2")
+    implementation("com.google.android.play:core:1.8.3")
     implementation("com.google.android.play:core-ktx:1.8.1")
     implementation("androidx.room:room-runtime:2.2.5")
     implementation("androidx.room:room-ktx:2.2.5")
