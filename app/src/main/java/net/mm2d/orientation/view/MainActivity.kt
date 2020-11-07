@@ -11,7 +11,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.text.format.DateFormat
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
@@ -40,9 +39,6 @@ import net.mm2d.orientation.util.*
 import net.mm2d.orientation.view.dialog.NightModeDialog
 import net.mm2d.orientation.view.dialog.OverlayPermissionDialog
 
-/**
- * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
- */
 class MainActivity : AppCompatActivity(), NightModeDialog.Callback {
     private val settings by lazy {
         Settings.get()
@@ -166,7 +162,7 @@ class MainActivity : AppCompatActivity(), NightModeDialog.Callback {
         notificationSample = NotificationSample(this)
         binding.content.status.setOnClickListener { toggleStatus() }
         binding.content.detailedSetting.setOnClickListener { DetailedSettingsActivity.start(this) }
-        binding.content.versionDescription.text = makeVersionInfo()
+        binding.content.versionDescription.text = BuildConfig.VERSION_NAME
         setUpOrientationIcons()
         binding.content.eachApp.setOnClickListener { EachAppActivity.start(this) }
         setUpNightMode()
@@ -174,7 +170,13 @@ class MainActivity : AppCompatActivity(), NightModeDialog.Callback {
 
     private fun setUpOrientationIcons() {
         notificationSample.buttonList.forEach { view ->
-            view.button.setOnClickListener { updateOrientation(view.orientation) }
+            view.button.setOnClickListener {
+                updateOrientation(view.orientation)
+                if (!OrientationHelper.isEnabled && SystemSettings.canDrawOverlays(this)) {
+                    MainController.start()
+                    settings.setAutoStart(true)
+                }
+            }
         }
     }
 
@@ -228,13 +230,6 @@ class MainActivity : AppCompatActivity(), NightModeDialog.Callback {
         settings.orientation = orientation
         notificationSample.update()
         MainController.update()
-    }
-
-    private fun makeVersionInfo(): String {
-        return BuildConfig.VERSION_NAME +
-            if (BuildConfig.DEBUG)
-                " # " + DateFormat.format("yyyy/M/d kk:mm:ss", BuildConfig.BUILD_TIME)
-            else ""
     }
 
     companion object {

@@ -38,6 +38,7 @@ interface Key {
         NIGHT_MODE_INT,
         AD_MOB_SIZE_STRING,
         ;
+
         companion object {
             const val FILE_NAME: String = "Main"
         }

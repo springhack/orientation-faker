@@ -15,9 +15,6 @@ import net.mm2d.orientation.settings.Key.Main
 import net.mm2d.orientation.util.AdMobSize
 import java.io.File
 
-/**
- * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
- */
 class Settings private constructor(
     private val preferences: Preferences<Main>
 ) {
@@ -118,9 +115,7 @@ class Settings private constructor(
         preferences.writeBoolean(Main.RESIDENT_BOOLEAN, autoStart)
     }
 
-    fun shouldAutoStart(): Boolean {
-        return preferences.readBoolean(Main.RESIDENT_BOOLEAN, false)
-    }
+    fun shouldAutoStart(): Boolean = preferences.readBoolean(Main.RESIDENT_BOOLEAN, false)
 
     fun setAdMobSize(value: String) {
         preferences.writeString(Main.AD_MOB_SIZE_STRING, value)
