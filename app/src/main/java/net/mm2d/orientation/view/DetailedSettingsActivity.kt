@@ -11,6 +11,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout.LayoutParams
@@ -62,7 +63,10 @@ class DetailedSettingsActivity : AppCompatActivity(),
 
     private fun setUpAdView() {
         adView = AdMob.makeDetailedAdView(this)
-        binding.container.addView(adView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        val param = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
+            it.gravity = Gravity.CENTER_HORIZONTAL
+        }
+        binding.container.addView(adView, param)
     }
 
     override fun onDestroy() {

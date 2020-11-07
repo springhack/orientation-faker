@@ -36,6 +36,7 @@ interface Key {
         FOREGROUND_PACKAGE_ENABLED_BOOLEAN,
         USE_ROUND_BACKGROUND_BOOLEAN,
         NIGHT_MODE_INT,
+        AD_MOB_SIZE_STRING,
         ;
         companion object {
             const val FILE_NAME: String = "Main"

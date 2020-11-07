@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.format.DateFormat
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -35,9 +36,7 @@ import net.mm2d.orientation.review.ReviewRequest
 import net.mm2d.orientation.service.MainController
 import net.mm2d.orientation.settings.NightModes
 import net.mm2d.orientation.settings.Settings
-import net.mm2d.orientation.util.AdMob
-import net.mm2d.orientation.util.Launcher
-import net.mm2d.orientation.util.SystemSettings
+import net.mm2d.orientation.util.*
 import net.mm2d.orientation.view.dialog.NightModeDialog
 import net.mm2d.orientation.view.dialog.OverlayPermissionDialog
 
@@ -77,8 +76,17 @@ class MainActivity : AppCompatActivity(), NightModeDialog.Callback {
     }
 
     private fun setUpAdView() {
-        adView = AdMob.makeSettingsAdView(this)
-        binding.container.addView(adView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        AbTest.loadAdMobSize()
+        val adMobSize = settings.getAdMobSize()
+        adView = AdMob.makeSettingsAdView(this, adMobSize)
+        val param = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
+            it.gravity = Gravity.CENTER_HORIZONTAL
+        }
+        if (adMobSize == AdMobSize.MEDIUM_RECTANGLE) {
+            binding.content.contentsContainer.addView(adView, 5, param)
+        } else {
+            binding.container.addView(adView, param)
+        }
     }
 
     @SuppressLint("NewApi")

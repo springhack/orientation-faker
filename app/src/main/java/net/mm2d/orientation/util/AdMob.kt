@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.mm2d.android.orientationfaker.BuildConfig
 import net.mm2d.log.Logger
+import net.mm2d.orientation.util.AdMobSize.*
 import java.net.URL
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -46,14 +47,21 @@ object AdMob {
         MobileAds.initialize(context) {}
     }
 
-    fun makeSettingsAdView(context: Context): AdView = AdView(context).apply {
-        adSize = AdSize.SMART_BANNER
+    fun makeSettingsAdView(context: Context, adMobSize: AdMobSize): AdView = AdView(context).apply {
+        adSize = adMobSize.toAdSize()
         adUnitId = UNIT_ID_SETTINGS
     }
 
     fun makeDetailedAdView(context: Context): AdView = AdView(context).apply {
-        adSize = AdSize.SMART_BANNER
+        adSize = AdSize.BANNER
         adUnitId = UNIT_ID_DETAILED
+    }
+
+    private fun AdMobSize.toAdSize(): AdSize = when (this) {
+        SMART_BANNER -> AdSize.SMART_BANNER
+        BANNER -> AdSize.BANNER
+        LARGE_BANNER -> AdSize.LARGE_BANNER
+        MEDIUM_RECTANGLE -> AdSize.MEDIUM_RECTANGLE
     }
 
     fun loadAd(activity: ComponentActivity, adView: AdView) {

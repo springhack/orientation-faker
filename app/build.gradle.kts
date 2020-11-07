@@ -90,11 +90,14 @@ dependencies {
     implementation("net.mm2d:color-chooser:0.2.0")
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.5")
 
-    implementation("com.google.firebase:firebase-core:18.0.0")
-    implementation("com.google.firebase:firebase-ads:19.5.0")
-    implementation("com.google.firebase:firebase-perf:19.0.9")
-    implementation("com.google.firebase:firebase-crashlytics:17.2.2")
-    implementation("com.google.firebase:firebase-analytics:18.0.0")
+    implementation(platform("com.google.firebase:firebase-bom:26.0.0"))
+    implementation("com.google.firebase:firebase-core")
+    implementation("com.google.firebase:firebase-ads")
+    implementation("com.google.firebase:firebase-perf")
+    implementation("com.google.firebase:firebase-crashlytics")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-config-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.android.ads.consent:consent-library:1.0.8")
 }
 

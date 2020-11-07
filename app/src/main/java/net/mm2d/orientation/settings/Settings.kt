@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import net.mm2d.android.orientationfaker.BuildConfig
 import net.mm2d.orientation.control.Orientation
 import net.mm2d.orientation.settings.Key.Main
+import net.mm2d.orientation.util.AdMobSize
 import java.io.File
 
 /**
@@ -120,6 +121,13 @@ class Settings private constructor(
     fun shouldAutoStart(): Boolean {
         return preferences.readBoolean(Main.RESIDENT_BOOLEAN, false)
     }
+
+    fun setAdMobSize(value: String) {
+        preferences.writeString(Main.AD_MOB_SIZE_STRING, value)
+    }
+
+    fun getAdMobSize(): AdMobSize =
+        AdMobSize.of(preferences.readString(Main.AD_MOB_SIZE_STRING, ""))
 
     companion object {
         private lateinit var settings: Settings

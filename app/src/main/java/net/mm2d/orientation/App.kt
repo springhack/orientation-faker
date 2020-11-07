@@ -21,8 +21,8 @@ import net.mm2d.orientation.service.KeepAlive
 import net.mm2d.orientation.service.MainController
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.tabs.CustomTabsHelper
-import net.mm2d.orientation.view.notification.NotificationHelper
 import net.mm2d.orientation.util.AdMob
+import net.mm2d.orientation.view.notification.NotificationHelper
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
