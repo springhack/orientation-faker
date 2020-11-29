@@ -53,7 +53,7 @@ object AdMob {
     }
 
     fun makeDetailedAdView(context: Context): AdView = AdView(context).apply {
-        adSize = AdSize.BANNER
+        adSize = AdSize.SMART_BANNER
         adUnitId = UNIT_ID_DETAILED
     }
 
