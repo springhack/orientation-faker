@@ -77,21 +77,20 @@ object AdMob {
     }
 
     private fun loadAd(adView: AdView, consent: ConsentStatus?) {
-        when (consent) {
-            ConsentStatus.NON_PERSONALIZED -> {
-                val request = AdRequest.Builder().build()
-                adView.loadAd(request)
-            }
+        val request = when (consent) {
             ConsentStatus.PERSONALIZED -> {
-                val param = Bundle().apply { putString("npa", "1") }
-                val request = AdRequest.Builder()
-                    .addNetworkExtrasBundle(AdMobAdapter::class.java, param)
+                AdRequest.Builder().build()
+            }
+            ConsentStatus.NON_PERSONALIZED -> {
+                AdRequest.Builder()
+                    .addNetworkExtrasBundle(AdMobAdapter::class.java, Bundle().apply { putString("npa", "1") })
                     .build()
-                adView.loadAd(request)
             }
             else -> {
+                return
             }
         }
+        adView.loadAd(request)
     }
 
     private suspend fun loadAndConfirmConsentState(activity: ComponentActivity): ConsentStatus =
