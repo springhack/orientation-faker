@@ -9,8 +9,8 @@ buildscript {
         classpath("com.github.ben-manes:gradle-versions-plugin:0.29.0")
 
         classpath("com.google.gms:google-services:4.3.4")
-        classpath("com.google.firebase:perf-plugin:1.3.3")
-        classpath("com.google.firebase:firebase-crashlytics-gradle:2.3.0")
+        classpath("com.google.firebase:perf-plugin:1.3.4")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:2.4.1")
     }
 }
 
