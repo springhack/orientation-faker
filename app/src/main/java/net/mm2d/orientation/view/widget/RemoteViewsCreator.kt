@@ -17,16 +17,20 @@ import net.mm2d.android.orientationfaker.R
 import net.mm2d.orientation.control.Orientation
 import net.mm2d.orientation.control.OrientationReceiver
 import net.mm2d.orientation.settings.Settings
+import net.mm2d.orientation.util.shouldUseWhiteForeground
 import net.mm2d.orientation.view.MainActivity
 
 object RemoteViewsCreator {
-    fun create(context: Context, orientation: Int): RemoteViews {
-        val settings = Settings.get()
-        val foreground = settings.foregroundColor
-        val selectedForeground = settings.foregroundColorSelected
-        val selectedBackground = settings.backgroundColorSelected
-        return RemoteViews(context.packageName, R.layout.notification).also { views ->
-            views.setInt(R.id.notification, "setBackgroundColor", settings.backgroundColor)
+    fun create(context: Context, orientation: Int): RemoteViews =
+        RemoteViews(context.packageName, R.layout.notification).also { views ->
+            val settings = Settings.get()
+            val foreground = settings.foregroundColor
+            val background = settings.backgroundColor
+            val selectedForeground = settings.foregroundColorSelected
+            val selectedBackground = settings.backgroundColorSelected
+            val shouldUseIconBackground = settings.shouldUseIconBackground
+            val baseColor = if (shouldUseIconBackground) settings.baseColor else background
+            views.setInt(R.id.notification, "setBackgroundColor", baseColor)
             val orientationList = settings.orientationList
             orientationList.forEachIndexed { index, value ->
                 val button = ViewIds.list[index]
@@ -36,11 +40,12 @@ object RemoteViewsCreator {
                     views.setOnClickPendingIntent(button.buttonId, createOrientationIntent(context, it.orientation))
                 }
             }
+            val iconShape = settings.iconShape
             val selectedIndex = orientationList.indexOf(orientation)
-            val shouldUseRoundBackground = settings.shouldUseRoundBackground
             ViewIds.list.forEachIndexed { index, it ->
+                views.setImageViewResource(it.backgroundId, iconShape.iconId)
                 if (index == selectedIndex) {
-                    if (shouldUseRoundBackground) {
+                    if (shouldUseIconBackground) {
                         views.setInt(it.buttonId, "setBackgroundColor", Color.TRANSPARENT)
                         views.setViewVisibility(it.backgroundId, View.VISIBLE)
                         views.setInt(it.backgroundId, "setColorFilter", selectedBackground)
@@ -51,12 +56,16 @@ object RemoteViewsCreator {
                     views.setInt(it.iconId, "setColorFilter", selectedForeground)
                     views.setTextColor(it.titleId, selectedForeground)
                 } else {
-                    views.setViewVisibility(it.backgroundId, View.GONE)
-                    views.setInt(it.buttonId, "setBackgroundColor", Color.TRANSPARENT)
+                    if (shouldUseIconBackground) {
+                        views.setViewVisibility(it.backgroundId, View.VISIBLE)
+                        views.setInt(it.backgroundId, "setColorFilter", background)
+                    } else {
+                        views.setViewVisibility(it.backgroundId, View.GONE)
+                    }
                     views.setInt(it.iconId, "setColorFilter", foreground)
                     views.setTextColor(it.titleId, foreground)
                 }
-                if (shouldUseRoundBackground) {
+                if (shouldUseIconBackground) {
                     views.setViewVisibility(it.titleId, View.GONE)
                 } else {
                     views.setViewVisibility(it.titleId, View.VISIBLE)
@@ -68,10 +77,13 @@ object RemoteViewsCreator {
                 }
             }
             views.setInt(R.id.remote_views_button_settings, "setBackgroundColor", Color.TRANSPARENT)
-            views.setInt(R.id.remote_views_icon_settings, "setColorFilter", foreground)
+            val whiteForeground = baseColor.shouldUseWhiteForeground()
+            val settingsColor = if (shouldUseIconBackground) {
+                if (whiteForeground) Color.WHITE else Color.BLACK
+            } else foreground
+            views.setInt(R.id.remote_views_icon_settings, "setColorFilter", settingsColor)
             views.setOnClickPendingIntent(R.id.remote_views_button_settings, createActivityIntent(context))
         }
-    }
 
     private fun createOrientationIntent(context: Context, orientation: Int): PendingIntent {
         val intent = Intent(OrientationReceiver.ACTION_ORIENTATION).also {

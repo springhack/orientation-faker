@@ -17,6 +17,7 @@ import android.view.View
 import android.widget.LinearLayout.LayoutParams
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isGone
 import androidx.gridlayout.widget.GridLayout
 import androidx.gridlayout.widget.GridLayout.spec
 import com.google.android.gms.ads.AdView
@@ -28,10 +29,12 @@ import net.mm2d.orientation.event.EventRouter
 import net.mm2d.orientation.service.MainController
 import net.mm2d.orientation.service.MainService
 import net.mm2d.orientation.settings.Default
+import net.mm2d.orientation.settings.IconShape
 import net.mm2d.orientation.settings.OrientationList
 import net.mm2d.orientation.settings.Settings
 import net.mm2d.orientation.util.AdMob
 import net.mm2d.orientation.util.SystemSettings
+import net.mm2d.orientation.view.dialog.IconShapeDialog
 import net.mm2d.orientation.view.dialog.OrientationHelpDialog
 import net.mm2d.orientation.view.dialog.ResetLayoutDialog
 import net.mm2d.orientation.view.dialog.ResetThemeDialog
@@ -40,7 +43,8 @@ import net.mm2d.orientation.view.view.CheckItemView
 class DetailedSettingsActivity : AppCompatActivity(),
     ResetThemeDialog.Callback,
     ResetLayoutDialog.Callback,
-    ColorChooserDialog.Callback {
+    ColorChooserDialog.Callback,
+    IconShapeDialog.Callback {
     private val settings by lazy {
         Settings.get()
     }
@@ -91,7 +95,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
         super.onResume()
         notificationSample.update()
         applyLayoutSelection()
-        applyUseRoundBackground()
+        applyUseIconBackground()
         applyUseBlankIcon()
         applyAutoRotateWarning()
         applyNotificationPrivacy()
@@ -110,7 +114,8 @@ class DetailedSettingsActivity : AppCompatActivity(),
         notificationSample = NotificationSample(this)
         setUpSample()
         setUpLayoutSelector()
-        setUpUseRoundBackground()
+        setUpUseIconBackground()
+        setUpIconShape()
         setUpUseBlankIcon()
         setUpAutoRotateWarning()
         setUpNotificationPrivacy()
@@ -122,6 +127,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
         binding.content.sampleBackground.setColorFilter(settings.backgroundColor)
         binding.content.sampleForegroundSelected.setColorFilter(settings.foregroundColorSelected)
         binding.content.sampleBackgroundSelected.setColorFilter(settings.backgroundColorSelected)
+        binding.content.sampleBase.setColorFilter(settings.baseColor)
         binding.content.foreground.setOnClickListener {
             ColorChooserDialog.show(this, it.id, settings.foregroundColor)
         }
@@ -133,6 +139,10 @@ class DetailedSettingsActivity : AppCompatActivity(),
         }
         binding.content.backgroundSelected.setOnClickListener {
             ColorChooserDialog.show(this, it.id, settings.backgroundColorSelected)
+        }
+        binding.content.base.isGone = !settings.shouldUseIconBackground
+        binding.content.base.setOnClickListener {
+            ColorChooserDialog.show(this, it.id, settings.baseColor)
         }
         binding.content.resetTheme.setOnClickListener { ResetThemeDialog.show(this) }
         setUpOrientationIcons()
@@ -169,6 +179,10 @@ class DetailedSettingsActivity : AppCompatActivity(),
                 settings.backgroundColorSelected = color
                 binding.content.sampleBackgroundSelected.setColorFilter(color)
             }
+            R.id.base -> {
+                settings.baseColor = color
+                binding.content.sampleBase.setColorFilter(color)
+            }
         }
         notificationSample.update()
         MainController.update()
@@ -180,6 +194,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
         binding.content.sampleBackground.setColorFilter(settings.backgroundColor)
         binding.content.sampleForegroundSelected.setColorFilter(settings.foregroundColorSelected)
         binding.content.sampleBackgroundSelected.setColorFilter(settings.backgroundColorSelected)
+        binding.content.sampleBase.setColorFilter(settings.baseColor)
         notificationSample.update()
         MainController.update()
     }
@@ -263,21 +278,55 @@ class DetailedSettingsActivity : AppCompatActivity(),
         }
     }
 
-    private fun setUpUseRoundBackground() {
-        binding.content.useRoundBackground.setOnClickListener {
-            toggleUseRoundBackground()
+    private fun setUpUseIconBackground() {
+        binding.content.useIconBackground.setOnClickListener {
+            toggleUseIconBackground()
         }
     }
 
-    private fun applyUseRoundBackground() {
-        binding.content.useRoundBackground.isChecked = settings.shouldUseRoundBackground
+    private fun applyUseIconBackground() {
+        binding.content.useIconBackground.isChecked = settings.shouldUseIconBackground
     }
 
-    private fun toggleUseRoundBackground() {
-        settings.shouldUseRoundBackground = !settings.shouldUseRoundBackground
-        applyUseRoundBackground()
+    private fun toggleUseIconBackground() {
+        val useIcon = !settings.shouldUseIconBackground
+        settings.shouldUseIconBackground = useIcon
+        if (useIcon && !settings.hasBaseColor()) {
+            settings.baseColor = settings.backgroundColor
+            binding.content.sampleBase.setColorFilter(settings.baseColor)
+        }
+        binding.content.base.isGone = !useIcon
+        applyUseIconBackground()
+        applyIconShape()
         MainController.update()
         notificationSample.update()
+    }
+
+    private fun setUpIconShape() {
+        applyIconShape()
+        binding.content.iconShape.setOnClickListener {
+            IconShapeDialog.show(this)
+        }
+    }
+
+    override fun onSelectIconShape(iconShape: IconShape) {
+        settings.iconShape = iconShape
+        applyIconShape()
+        MainController.update()
+        notificationSample.update()
+    }
+
+    private fun applyIconShape() {
+        if (settings.shouldUseIconBackground) {
+            binding.content.iconShape.isEnabled = true
+            binding.content.iconShape.alpha = 1.0f
+        } else {
+            binding.content.iconShape.isEnabled = false
+            binding.content.iconShape.alpha = 0.5f
+        }
+        val iconShape = settings.iconShape
+        binding.content.iconShapeIcon.setImageResource(iconShape.iconId)
+        binding.content.iconShapeDescription.setText(iconShape.textId)
     }
 
     private fun setUpUseBlankIcon() {

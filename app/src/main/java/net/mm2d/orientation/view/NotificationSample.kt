@@ -27,7 +27,7 @@ class NotificationSample(activity: Activity) {
             activity.findViewById(it.backgroundId),
         )
     }
-    private val background = activity.findViewById<View>(R.id.notification)
+    private val base = activity.findViewById<View>(R.id.notification)
 
     init {
         activity.findViewById<View>(R.id.remote_views_button_settings).visibility = View.GONE
@@ -37,9 +37,12 @@ class NotificationSample(activity: Activity) {
         val settings = Settings.get()
         val orientation = OrientationHelper.getOrientation()
         val foreground = settings.foregroundColor
-        background.setBackgroundColor(settings.backgroundColor)
+        val background = settings.backgroundColor
         val selectedForeground = settings.foregroundColorSelected
         val selectedBackground = settings.backgroundColorSelected
+        val shouldUseIconBackground = settings.shouldUseIconBackground
+        val baseColor = if (shouldUseIconBackground) settings.baseColor else background
+        base.setBackgroundColor(baseColor)
         val orientationList = settings.orientationList
         orientationList.forEachIndexed { index, value ->
             val button = buttonList[index]
@@ -49,11 +52,12 @@ class NotificationSample(activity: Activity) {
                 button.orientation = value
             }
         }
+        val iconShape = settings.iconShape
         val selectedIndex = orientationList.indexOf(orientation)
-        val shouldUseRoundBackground = settings.shouldUseRoundBackground
         buttonList.forEachIndexed { index, it ->
+            it.background.setImageResource(iconShape.iconId)
             if (index == selectedIndex) {
-                if (shouldUseRoundBackground) {
+                if (shouldUseIconBackground) {
                     it.button.setBackgroundColor(Color.TRANSPARENT)
                     it.background.visibility = View.VISIBLE
                     it.background.setColorFilter(selectedBackground)
@@ -64,12 +68,17 @@ class NotificationSample(activity: Activity) {
                 it.icon.setColorFilter(selectedForeground)
                 it.title.setTextColor(selectedForeground)
             } else {
-                it.background.visibility = View.GONE
+                if (shouldUseIconBackground) {
+                    it.background.visibility = View.VISIBLE
+                    it.background.setColorFilter(background)
+                } else {
+                    it.background.visibility = View.GONE
+                }
                 it.button.setBackgroundColor(Color.TRANSPARENT)
                 it.icon.setColorFilter(foreground)
                 it.title.setTextColor(foreground)
             }
-            if (shouldUseRoundBackground) {
+            if (shouldUseIconBackground) {
                 it.title.visibility = View.GONE
             } else {
                 it.title.visibility = View.VISIBLE

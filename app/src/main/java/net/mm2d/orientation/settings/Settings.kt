@@ -38,6 +38,12 @@ class Settings private constructor(
         get() = preferences.readInt(Main.COLOR_BACKGROUND_SELECTED_INT, Default.color.backgroundSelected)
         set(value) = preferences.writeInt(Main.COLOR_BACKGROUND_SELECTED_INT, value)
 
+    var baseColor: Int
+        get() = preferences.readInt(Main.COLOR_BASE_INT, Default.color.background)
+        set(value) = preferences.writeInt(Main.COLOR_BASE_INT, value)
+
+    fun hasBaseColor(): Boolean = preferences.contains(Main.COLOR_BASE_INT)
+
     var notifySecret: Boolean
         get() = preferences.readBoolean(Main.NOTIFY_SECRET_BOOLEAN, false)
         set(value) = preferences.writeBoolean(Main.NOTIFY_SECRET_BOOLEAN, value)
@@ -96,7 +102,7 @@ class Settings private constructor(
         get() = preferences.readBoolean(Main.FOREGROUND_PACKAGE_ENABLED_BOOLEAN, true)
         set(value) = preferences.writeBoolean(Main.FOREGROUND_PACKAGE_ENABLED_BOOLEAN, value)
 
-    var shouldUseRoundBackground: Boolean
+    var shouldUseIconBackground: Boolean
         get() = preferences.readBoolean(Main.USE_ROUND_BACKGROUND_BOOLEAN, false)
         set(value) = preferences.writeBoolean(Main.USE_ROUND_BACKGROUND_BOOLEAN, value)
 
@@ -104,11 +110,20 @@ class Settings private constructor(
         get() = preferences.readInt(Main.NIGHT_MODE_INT, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         set(value) = preferences.writeInt(Main.NIGHT_MODE_INT, value)
 
+    var iconShape: IconShape
+        get() = IconShape.of(preferences.readString(Main.ICON_SHAPE_STRING, ""))
+        set(value) = preferences.writeString(Main.ICON_SHAPE_STRING, value.name)
+
     fun resetTheme() {
         foregroundColor = Default.color.foreground
         backgroundColor = Default.color.background
         foregroundColorSelected = Default.color.foregroundSelected
         backgroundColorSelected = Default.color.backgroundSelected
+        if (shouldUseIconBackground) {
+            baseColor = Default.color.background
+        } else {
+            preferences.remove(Main.COLOR_BASE_INT)
+        }
     }
 
     fun setAutoStart(autoStart: Boolean) {
