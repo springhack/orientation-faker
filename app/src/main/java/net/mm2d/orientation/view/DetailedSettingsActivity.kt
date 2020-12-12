@@ -19,7 +19,7 @@ import android.widget.LinearLayout.LayoutParams
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.gridlayout.widget.GridLayout
 import androidx.gridlayout.widget.GridLayout.spec
 import com.google.android.gms.ads.AdView
@@ -144,7 +144,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
         binding.content.backgroundSelected.setOnClickListener {
             ColorChooserDialog.show(this, it.id, settings.backgroundColorSelected, true)
         }
-        binding.content.base.isGone = !settings.shouldUseIconBackground
+        binding.content.base.isVisible = settings.shouldUseIconBackground
         binding.content.base.setOnClickListener {
             ColorChooserDialog.show(this, it.id, settings.baseColor, true)
         }
@@ -304,7 +304,7 @@ class DetailedSettingsActivity : AppCompatActivity(),
             settings.baseColor = settings.backgroundColor
             binding.content.sampleBase.setColorFilter(settings.baseColor)
         }
-        binding.content.base.isGone = !useIcon
+        binding.content.base.isVisible = useIcon
         applyUseIconBackground()
         applyIconShape()
         MainController.update()
