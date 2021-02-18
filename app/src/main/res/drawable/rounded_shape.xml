@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/bg_notification"/>
+
+    <stroke android:width="2dp"
+        android:color="@color/bg_notification"/>
+
+    <padding android:left="4dp"
+        android:top="4dp"
+        android:right="4dp"
+        android:bottom="4dp"/>
+
+    <corners android:radius="8dp" />
+</shape>

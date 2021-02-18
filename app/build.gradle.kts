@@ -87,7 +87,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.3.3")
     kapt("androidx.room:room-compiler:2.2.6")
     implementation("net.mm2d.color-chooser:color-chooser:0.2.4")
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.6")
+    // debugImplementation("com.squareup.leakcanary:leakcanary-android:2.6")
 }
 
 fun isStable(version: String): Boolean {

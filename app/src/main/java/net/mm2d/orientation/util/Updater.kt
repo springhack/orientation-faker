@@ -20,19 +20,22 @@ object Updater {
     private const val DAYS_FOR_UPDATE: Int = 2
 
     fun startUpdateIfAvailable(activity: Activity) {
-        val manager = AppUpdateManagerFactory.create(activity.applicationContext)
-        manager.appUpdateInfo
-            .addOnSuccessListener {
-                if (it.isAvailable()) {
-                    runCatching {
-                        manager.startUpdateFlow(it, activity, AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE))
-                    }
-                }
-            }
+        return;
+        // val manager = AppUpdateManagerFactory.create(activity.applicationContext)
+        // manager.appUpdateInfo
+        //     .addOnSuccessListener {
+        //         if (it.isAvailable()) {
+        //             runCatching {
+        //                 manager.startUpdateFlow(it, activity, AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE))
+        //             }
+        //         }
+        //     }
     }
 
-    private fun AppUpdateInfo.isAvailable(): Boolean =
-        updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-            clientVersionStalenessDays.let { it != null && it >= DAYS_FOR_UPDATE } &&
-            isImmediateUpdateAllowed
+    private fun AppUpdateInfo.isAvailable(): Boolean {
+        return false;
+        // updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+        //     clientVersionStalenessDays.let { it != null && it >= DAYS_FOR_UPDATE } &&
+        //     isImmediateUpdateAllowed
+    }
 }

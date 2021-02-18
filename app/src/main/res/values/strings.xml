@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Orientation Control</string>
+    <string name="app_name">OriCtrl</string>
 
     <string name="notification_channel_name">@string/app_name</string>
 
