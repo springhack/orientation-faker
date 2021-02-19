@@ -19,7 +19,7 @@ android {
 
     defaultConfig {
         applicationId = "net.mm2d.android.orientationfaker"
-        minSdkVersion(21)
+        minSdkVersion(24)
         targetSdkVersion(30)
         versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
